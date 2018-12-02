@@ -25,11 +25,7 @@ Definition bind A B (f:A -> Graph B) (g:Graph A) := foldg A (Graph B) (Empty B) 
 Lemma bind_is_hom : forall A B (f: A -> Graph B), homomorphism A B (bind A B f).
 Proof.
   intros.
-  split.
-  - auto.
-  - split.
-  -- auto.
-  -- auto.
+  repeat split.
 Qed.
 
 Lemma hom_is_bind : forall A B (hom: Graph A -> Graph B),
@@ -96,16 +92,14 @@ Proof.
   - destruct (bind_is_hom A B f_v) as (_,H).
     destruct H with (a:= g1) (b:= g2)  as (H1,_).
     rewrite H1.
-    rewrite foldg_overlay.
-    rewrite foldg_overlay.
+    repeat rewrite foldg_overlay.
     rewrite IHg1.
     rewrite IHg2.
     reflexivity.
   - destruct (bind_is_hom A B f_v) as (_,H).
     destruct H with (a:= g1) (b:= g2)  as (_,H1).
     rewrite H1.
-    rewrite foldg_connect.
-    rewrite foldg_connect.
+    repeat rewrite foldg_connect.
     rewrite IHg1.
     rewrite IHg2.
     reflexivity.
