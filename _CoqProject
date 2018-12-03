@@ -1,3 +1,4 @@
 -R src/ Alga
 src/Graph.v
 src/Homomorphism.v
+src/ReducedHomo.v

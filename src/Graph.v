@@ -30,3 +30,19 @@ Proof. auto. Qed.
 Lemma foldg_connect : forall A B (e:B) (v:A -> B) (o:B -> B -> B) (c:B -> B -> B) (a:Graph A) (b:Graph A),
   foldg A B e v o c (Connect A a b) = c (foldg A B e v o c a) (foldg A B e v o c b).
 Proof. auto. Qed.
+
+Require Import Coq.Relations.Relation_Definitions.
+Require Import Coq.Classes.RelationClasses.
+
+Class EqG (A:Type) (R : relation (Graph A)) : Prop := {
+    EqG_Reflexive :> Reflexive R ;
+    EqG_Symmetric :> Symmetric R ;
+    EqG_Transitive :> Transitive R }.
+
+Lemma eq_impl_eqG (A:Type) (R: relation (Graph A)) (a:Graph A) (b:Graph A): a=b -> EqG A R -> R a b.
+Proof.
+  intros L H.
+  rewrite L.
+  destruct H.
+  apply EqG_Reflexive0.
+Qed.
