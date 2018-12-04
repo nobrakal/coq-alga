@@ -1,5 +1,7 @@
 Require Coq.Logic.FunctionalExtensionality.
 Require Import Coq.Program.Basics.
+Require Import Coq.Arith.PeanoNat.
+Require Import Omega.
 
 Require Import Graph.
 
@@ -38,7 +40,7 @@ Proof.
     auto.
 Qed.
 
-Theorem equiv_bind_hom : forall A B (f : Graph A -> Graph B),
+Theorem equiv_bind_hom A B (f : Graph A -> Graph B) :
   ((homomorphism A B f) <-> f = (bind A B (compose f (Vertex A)))).
 Proof.
   intros.
@@ -87,4 +89,44 @@ Proof.
   rewrite (inline_bind B C).
   rewrite foldg_bind.
   auto.
+Qed.
+
+Lemma size_ov A (g1 g2 : Graph A) : size A (Overlay A g1 g2) = size A g1 + size A g2.
+Proof. auto. Qed.
+
+Lemma size_co A (g1 g2 : Graph A) : size A (Connect A g1 g2) = size A g1 + size A g2.
+Proof. auto. Qed.
+
+Lemma sup1 (m n: nat) : (n >= 1) -> m + n >= 1.
+Proof. omega. Qed.
+
+Lemma size_sup1 A (g:Graph A) : size A g >= 1.
+Proof.
+  induction g.
+  - compute. auto.
+  - compute. auto.
+  - rewrite size_ov.
+    apply sup1.
+    exact IHg2.
+  - rewrite size_co.
+    apply sup1.
+    exact IHg2.
+Qed.
+
+Lemma hom_leq_size A B (f: Graph A -> Graph B) : (homomorphism A B f) -> forall g, size A g <= size B (f g).
+Proof.
+  intros H g.
+  destruct H as (H1,H2).
+  induction g.
+  - rewrite H1.
+    auto.
+  - apply size_sup1.
+  - destruct H2 with (a:=g1) (b:=g2) as (H3,_).
+    rewrite H3.
+    repeat rewrite size_ov.
+    omega.
+  - destruct H2 with (a:=g1) (b:=g2) as (_,H3).
+    rewrite H3.
+    repeat rewrite size_co.
+    omega.
 Qed.
