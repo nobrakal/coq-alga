@@ -18,6 +18,8 @@ Definition bind A B (f:A -> Graph B) (g:Graph A) := foldg A (Graph B) (Empty B) 
 
 Definition size A := foldg A nat 1 (fun _ => 1) (fun x y => x+y) (fun x y => x+y).
 
+Definition isEmpty A := foldg A bool true (fun _ => false) orb orb.
+
 Lemma inline_compose : forall A B C (f : A -> B) (g : B -> C) x, (compose g f) x = g (f x).
 Proof. auto. Qed.
 
