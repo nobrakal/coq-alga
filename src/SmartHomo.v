@@ -8,21 +8,21 @@ Require Import Coq.Relations.Relation_Definitions.
 Require Import Graph.
 Require Import ReducedHomo.
 
-Definition kSimpl (A: Type) (c : Graph A -> Graph A -> Graph A) (x y:Graph A) :=
-  if isEmpty A x
-  then if isEmpty A y
-    then Empty A
+Definition kSimpl {A: Type} (c : Graph A -> Graph A -> Graph A) (x y:Graph A) :=
+  if isEmpty x
+  then if isEmpty y
+    then Empty
     else y
-  else if isEmpty A y
+  else if isEmpty y
     then x
     else c x y.
 
-Definition dropEmpty (A:Type) := foldg A (Graph A) (Empty A) (Vertex A) (kSimpl A (Overlay A)) (kSimpl A (Connect A)).
+Definition dropEmpty {A:Type} (g:Graph A) := foldg Empty Vertex (kSimpl Overlay) (kSimpl Connect) g.
 
-Definition Smart_hom (A B:Type) (f : Graph A -> Graph B) : Prop := 
-  f = compose (dropEmpty B) (bind A B (compose f (Vertex A))).
+Definition Smart_hom {A B:Type} (f : Graph A -> Graph B) : Prop := 
+  f = compose dropEmpty (bind (compose f Vertex)).
 
-Lemma smart_hom_empty (A B: Type) (f : Graph A -> Graph B) : Smart_hom A B f -> f (Empty A) = Empty B.
+Lemma smart_hom_empty (A B: Type) (f : Graph A -> Graph B) : Smart_hom f -> f Empty = Empty.
 Proof.
   intros H.
   rewrite H.
@@ -30,7 +30,7 @@ Proof.
 Qed.
 
 Lemma smart_hom_overlay (A B: Type) (f : Graph A -> Graph B) (a b: Graph A) : 
-  Smart_hom A B f -> f (Overlay A a b) = kSimpl B (Overlay B) (f a) (f b).
+  Smart_hom f -> f (Overlay a b) = kSimpl Overlay (f a) (f b).
 Proof.
   intros H.
   rewrite H.
@@ -53,5 +53,5 @@ Proof.
     reflexivity.
   - intros a b.
     rewrite (smart_hom_overlay A B f a b S).
-    rewrite kSimpl_simpl.
-     *)
+    induction (f a).
+    --  *)

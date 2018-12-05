@@ -6,33 +6,38 @@ Inductive Graph A :=
   | Overlay : Graph A -> Graph A -> Graph A
   | Connect : Graph A -> Graph A -> Graph A.
 
-Fixpoint foldg A B (e:B) (v:A -> B) (o:B -> B -> B) (c:B -> B -> B) (g:Graph A) :=
+Arguments Empty {A}.
+Arguments Vertex {A}.
+Arguments Overlay {A}.
+Arguments Connect {A}.
+
+Fixpoint foldg {A B : Type} (e:B) (v:A -> B) (o:B -> B -> B) (c:B -> B -> B) (g:Graph A) :=
   match g with
-    | Empty _ => e
-    | Vertex _ x => v x
-    | Overlay _ a b => o (foldg A B e v o c a) (foldg A B e v o c b)
-    | Connect _ a b => c (foldg A B e v o c a) (foldg A B e v o c b)
+    | Empty => e
+    | Vertex x => v x
+    | Overlay a b => o (foldg e v o c a) (foldg e v o c b)
+    | Connect a b => c (foldg e v o c a) (foldg e v o c b)
   end.
 
-Definition bind A B (f:A -> Graph B) (g:Graph A) := foldg A (Graph B) (Empty B) f (Overlay B) (Connect B) g.
+Definition bind {A B:Type} (f:A -> Graph B) (g:Graph A) := foldg Empty f Overlay Connect g.
 
-Definition size A := foldg A nat 1 (fun _ => 1) (fun x y => x+y) (fun x y => x+y).
+Definition size {A:Type} (g : Graph A) := foldg 1 (fun _ => 1) (fun x y => x+y) (fun x y => x+y) g.
 
-Definition isEmpty A := foldg A bool true (fun _ => false) orb orb.
+Definition isEmpty {A:Type}  (g : Graph A) := foldg true (fun _ => false) orb orb g.
 
 Lemma inline_compose : forall A B C (f : A -> B) (g : B -> C) x, (compose g f) x = g (f x).
 Proof. auto. Qed.
 
 Lemma inline_bind : forall A B (f_v : A -> Graph B),
-  bind A B f_v = foldg A (Graph B) (Empty B) f_v (Overlay B) (Connect B).
+  bind f_v = foldg Empty f_v Overlay Connect.
 Proof. auto. Qed.
 
 Lemma foldg_overlay : forall A B (e:B) (v:A -> B) (o:B -> B -> B) (c:B -> B -> B) (a:Graph A) (b:Graph A),
-  foldg A B e v o c (Overlay A a b) = o (foldg A B e v o c a) (foldg A B e v o c b).
+  foldg e v o c (Overlay a b) = o (foldg e v o c a) (foldg e v o c b).
 Proof. auto. Qed.
 
 Lemma foldg_connect : forall A B (e:B) (v:A -> B) (o:B -> B -> B) (c:B -> B -> B) (a:Graph A) (b:Graph A),
-  foldg A B e v o c (Connect A a b) = c (foldg A B e v o c a) (foldg A B e v o c b).
+  foldg e v o c (Connect a b) = c (foldg e v o c a) (foldg e v o c b).
 Proof. auto. Qed.
 
 Require Import Coq.Relations.Relation_Definitions.
@@ -59,13 +64,13 @@ Class EqG (A:Type) (R : relation (Graph A)) : Prop := {
   EqG_Transitive :> Transitive R ;
 
   (* Overlay *)
-  EqG_PlusCommut :> forall x y, R (Overlay A x y) (Overlay A y x);
-  EqG_PlusAssoc :> forall x y z, R (Overlay A x (Overlay A y z)) (Overlay A (Overlay A x y) z);
+  EqG_PlusCommut :> forall x y, R (Overlay x y) (Overlay y x);
+  EqG_PlusAssoc :> forall x y z, R (Overlay x (Overlay y z)) (Overlay (Overlay x y) z);
 
   (* Connect *)
-  EqG_TimesLeftId  :> forall x, R (Connect A (Empty A) x) x ;
-  EqG_TimesRightId :> forall x, R (Connect A x (Empty A)) x ;
-  EqG_TimesAssoc :> forall x y z, R (Connect A x (Connect A y z)) (Connect A (Connect A x y) z);
+  EqG_TimesLeftId  :> forall x, R (Connect Empty x) x ;
+  EqG_TimesRightId :> forall x, R (Connect x Empty) x ;
+  EqG_TimesAssoc :> forall x y z, R (Connect x (Connect y z)) (Connect (Connect x y) z);
  }.
 
 Lemma eq_impl_eqG (A:Type) (R: relation (Graph A)) (a:Graph A) (b:Graph A): a=b -> EqG A R -> R a b.
@@ -76,6 +81,6 @@ Proof.
   reflexivity.
 Qed.
 
-Theorem id_Plus (A:Type) (R:relation (Graph A)) (x:Graph A) : EqG A R -> R (Overlay A x (Empty A)) x.
+Theorem id_Plus (A:Type) (R:relation (Graph A)) (x:Graph A) : EqG A R -> R (Overlay x Empty) x.
 Proof.
 Admitted.
