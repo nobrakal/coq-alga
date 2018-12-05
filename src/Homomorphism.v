@@ -54,7 +54,7 @@ Proof.
   intros A B C e v o c f_v.
   apply FunctionalExtensionality.functional_extensionality.
   intro g.
-  rewrite inline_compose.
+  unfold compose.
   induction g.
   - auto.
   - auto.

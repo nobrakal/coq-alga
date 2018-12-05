@@ -25,9 +25,6 @@ Definition size {A:Type} (g : Graph A) := foldg 1 (fun _ => 1) (fun x y => x+y) 
 
 Definition isEmpty {A:Type}  (g : Graph A) := foldg true (fun _ => false) orb orb g.
 
-Lemma inline_compose : forall A B C (f : A -> B) (g : B -> C) x, (compose g f) x = g (f x).
-Proof. auto. Qed.
-
 Lemma inline_bind : forall A B (f_v : A -> Graph B),
   bind f_v = foldg Empty f_v Overlay Connect.
 Proof. auto. Qed.

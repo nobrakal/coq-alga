@@ -66,8 +66,29 @@ Proof.
     reflexivity.
 Qed.
 
+Lemma isEmpty_empty (A:Type) :isEmpty (Empty (A:=A)) = true.
+Proof. auto. Qed.
+
+Lemma ksimpl_c_left_empty_x (A : Type) (c : Graph A -> Graph A -> Graph A) (x:Graph A) :
+  kSimpl c Empty x = x.
+Proof.
+  unfold kSimpl.
+  rewrite isEmpty_empty.
+Admitted.
 (*
-Theorem smart_hom_is_reduced_hom A B (R: relation (Graph B)) (f : Graph A -> Graph B) :
+Lemma ksimpl_c_right_empty_x (A : Type) (c : Graph A -> Graph A -> Graph A) (x:Graph A) :
+  kSimpl c x Empty = x.
+Admitted.
+
+Lemma ksimpl_not_empty (A : Type) (c : Graph A -> Graph A -> Graph A) (x y:Graph A) :
+  x <> Empty /\ y <> Empty -> kSimpl c x y = c x y.
+Admitted. *)
+
+Lemma graph_empty_or_not2 (A:Type) : forall (x y:Graph A), x=Empty \/ y=Empty \/ (x <> Empty /\ y <> Empty).
+Admitted.
+
+(* False lemma *)
+(* Theorem smart_hom_is_reduced_hom A B (R: relation (Graph B)) (f : Graph A -> Graph B) :
   EqG B R -> Smart_hom f -> Reduced_hom R f.
 Proof.
   intros H S.
@@ -77,5 +98,29 @@ Proof.
     reflexivity.
   - intros a b.
     rewrite (smart_hom_overlay A B f a b S).
-    rewrite (smart_hom_single A B f S).
-*)
+    destruct (graph_empty_or_not2 B (f a) (f b)).
+   -- rewrite H0.
+      rewrite EqG_PlusCommut.
+      rewrite (id_Plus B R (f b) H).
+      rewrite ksimpl_c_left_empty_x.
+      reflexivity.
+   -- destruct H0.
+    --- rewrite H0.
+        rewrite (id_Plus B R (f a) H).
+        rewrite ksimpl_c_right_empty_x.
+        reflexivity.
+    --- rewrite (ksimpl_not_empty B Overlay (f a) (f b) H0). reflexivity.
+  - intros a b.
+    rewrite (smart_hom_connect A B f a b S).
+    destruct (graph_empty_or_not2 B (f a) (f b)).
+   -- rewrite H0.
+      rewrite EqG_TimesLeftId.
+      rewrite ksimpl_c_left_empty_x.
+      reflexivity.
+   -- destruct H0.
+    --- rewrite H0.
+        rewrite EqG_TimesRightId.
+        rewrite ksimpl_c_right_empty_x.
+        reflexivity.
+    --- rewrite (ksimpl_not_empty B Connect (f a) (f b) H0). reflexivity.
+Qed. *)
