@@ -5,43 +5,40 @@ Require Import Omega.
 
 Require Import Graph.
 
-Definition homomorphism A B (f : Graph A -> Graph B) : Prop :=
-   f (Empty A) = (Empty B)
-/\ forall a b, f (Overlay A a b) = Overlay B (f a) (f b)
-/\ forall a b, f (Connect A a b) = Connect B (f a) (f b).
+Class Homomorphism (A B:Type) (f : Graph A -> Graph B) : Prop := {
+  (* Equiv *)
+  Hom_Empty :> f (Empty A) = (Empty B) ;
+  Hom_Overlay :> forall a b, f (Overlay A a b) = Overlay B (f a) (f b) ;
+  Hom_Connect :> forall a b, f (Connect A a b) = Connect B (f a) (f b)
+ }.
 
-Lemma bind_is_hom : forall A B (f: A -> Graph B), homomorphism A B (bind A B f).
+Lemma bind_is_hom : forall A B (f: A -> Graph B), Homomorphism A B (bind A B f).
 Proof.
   intros.
   repeat split.
 Qed.
 
 Lemma hom_is_bind : forall A B (hom: Graph A -> Graph B),
-  (homomorphism A B hom) -> hom = (bind A B (compose hom (Vertex A))).
+  (Homomorphism A B hom) -> hom = (bind A B (compose hom (Vertex A))).
 Proof.
   intros A B hom H.
-  destruct H as (H0,H1).
   apply FunctionalExtensionality.functional_extensionality.
   intro g.
   induction g.
+  - compute. apply Hom_Empty.
   - auto.
-  - auto.
-  - intros.
-    destruct H1 with (a:= g1) (b:= g2) as (H11,_).
-    rewrite H11.
+  - rewrite Hom_Overlay.
     rewrite IHg1.
     rewrite IHg2.
     auto.
-  - intros.
-    destruct H1 with (a:= g1) (b:= g2) as (_,H12).
-    rewrite H12.
+  - rewrite Hom_Connect.
     rewrite IHg1.
     rewrite IHg2.
     auto.
 Qed.
 
 Theorem equiv_bind_hom A B (f : Graph A -> Graph B) :
-  ((homomorphism A B f) <-> f = (bind A B (compose f (Vertex A)))).
+  ((Homomorphism A B f) <-> f = (bind A B (compose f (Vertex A)))).
 Proof.
   intros.
   split.
@@ -62,16 +59,14 @@ Proof.
   induction g.
   - auto.
   - auto.
-  - destruct (bind_is_hom A B f_v) as (_,H).
-    destruct H with (a:= g1) (b:= g2)  as (H1,_).
-    rewrite H1.
+  - pose (H :=bind_is_hom A B f_v).
+    rewrite Hom_Overlay.
     repeat rewrite foldg_overlay.
     rewrite IHg1.
     rewrite IHg2.
     reflexivity.
-  - destruct (bind_is_hom A B f_v) as (_,H).
-    destruct H with (a:= g1) (b:= g2)  as (_,H1).
-    rewrite H1.
+  - pose (H :=bind_is_hom A B f_v).
+    rewrite Hom_Connect.
     repeat rewrite foldg_connect.
     rewrite IHg1.
     rewrite IHg2.
@@ -79,7 +74,7 @@ Proof.
 Qed.
 
 Theorem bind_compo : forall A B C (hom1 : Graph A -> Graph B) (hom2 : Graph B -> Graph C),
- (homomorphism A B hom1) /\ (homomorphism B C hom2) -> 
+ (Homomorphism A B hom1) /\ (Homomorphism B C hom2) -> 
   compose hom2 hom1 = bind A C (compose hom2 (compose hom1 (Vertex A))).
 Proof.
   intros A B C hom1 hom2 H.
@@ -113,20 +108,17 @@ Proof.
     exact IHg2.
 Qed.
 
-Lemma hom_leq_size A B (f: Graph A -> Graph B) : (homomorphism A B f) -> forall g, size A g <= size B (f g).
+Lemma hom_leq_size A B (f: Graph A -> Graph B) : (Homomorphism A B f) -> forall g, size A g <= size B (f g).
 Proof.
   intros H g.
-  destruct H as (H1,H2).
   induction g.
-  - rewrite H1.
+  - rewrite Hom_Empty.
     auto.
   - apply size_sup1.
-  - destruct H2 with (a:=g1) (b:=g2) as (H3,_).
-    rewrite H3.
+  - rewrite Hom_Overlay.
     repeat rewrite size_ov.
     omega.
-  - destruct H2 with (a:=g1) (b:=g2) as (_,H3).
-    rewrite H3.
+  - rewrite Hom_Connect.
     repeat rewrite size_co.
     omega.
 Qed.

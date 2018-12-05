@@ -14,20 +14,17 @@ Definition reduced_hom A B (R: relation (Graph B)) (f : Graph A -> Graph B) : Pr
 /\ forall a b, R (f (Connect A a b)) (Connect B (f a) (f b)).
 
 Theorem hom_is_reduced_hom (A B:Type) (R: relation (Graph B)) (f : Graph A -> Graph B) :
-  EqG B R -> homomorphism A B f -> reduced_hom A B R f.
+  EqG B R -> Homomorphism A B f -> reduced_hom A B R f.
 Proof.
   intros E H.
-  destruct H as (H1, H20).
   split.
   - exact E.
   - repeat split.
-   -- rewrite H1. reflexivity.
-   -- destruct H20 with (a:=a) (b:=b) as (H2, _).
-      rewrite H2.
+   -- rewrite Hom_Empty. reflexivity.
+   -- rewrite Hom_Overlay.
       reflexivity.
    -- intros a0 b0. 
-      destruct H20 with (a:=a0) (b:=b0) as (_, H3).
-      rewrite H3.
+      rewrite Hom_Connect.
       reflexivity.
 Qed.
 
@@ -73,7 +70,7 @@ Proof. auto. Qed.
 Lemma size1 (A B:Type) : size B (const_empty A B (Overlay A (Empty A) (Empty A))) = 1.
 Proof. auto. Qed.
 
-Theorem const_empty_is_not_hom (A B : Type) : not (homomorphism A B (const_empty A B)).
+Theorem const_empty_is_not_hom (A B : Type) : not (Homomorphism A B (const_empty A B)).
 Proof.
   unfold not.
   intros H.
