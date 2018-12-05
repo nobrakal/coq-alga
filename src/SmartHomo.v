@@ -29,7 +29,7 @@ Proof.
   reflexivity.
 Qed.
 
-Lemma smart_hom_overlay (A B: Type) (f : Graph A -> Graph B) (a b: Graph A) : 
+Lemma smart_hom_overlay (A B: Type) (f : Graph A -> Graph B) (a b: Graph A) :
   Smart_hom f -> f (Overlay a b) = kSimpl Overlay (f a) (f b).
 Proof.
   intros H.
@@ -37,14 +37,38 @@ Proof.
   reflexivity.
 Qed.
 
-(* Lemma kSimpl_simpl (A: Type) (c : Graph A -> Graph A -> Graph A) (x:Graph A) : kSimpl A c (Empty A) x = x.
-Admitted. *)
+Lemma smart_hom_connect (A B: Type) (f : Graph A -> Graph B) (a b: Graph A) :
+  Smart_hom f -> f (Connect a b) = kSimpl Connect (f a) (f b).
+Proof.
+  intros H.
+  rewrite H.
+  reflexivity.
+Qed.
 
-(* Lemma graphEmptyOrNotDec
- *)
+Theorem smart_hom_single (A B:Type) (f : Graph A -> Graph B) :
+  Smart_hom f -> f = foldg Empty (fun v => f (Vertex v)) (kSimpl Overlay) (kSimpl Connect).
+Proof.
+  intros S.
+  apply FunctionalExtensionality.functional_extensionality.
+  intros g.
+  induction g.
+  - rewrite (smart_hom_empty A B f S). compute. reflexivity.
+  - reflexivity.
+  - rewrite foldg_overlay.
+    rewrite (eq_sym IHg1).
+    rewrite (eq_sym IHg2).
+    rewrite (smart_hom_overlay A B f g1 g2 S).
+    reflexivity.
+  - rewrite foldg_connect.
+    rewrite (eq_sym IHg1).
+    rewrite (eq_sym IHg2).
+    rewrite (smart_hom_connect A B f g1 g2 S).
+    reflexivity.
+Qed.
 
-(* Theorem smart_hom_is_reduced_hom A B (R: relation (Graph B)) (f : Graph A -> Graph B) :
-  EqG B R -> Smart_hom A B f -> Reduced_hom A B R f.
+(*
+Theorem smart_hom_is_reduced_hom A B (R: relation (Graph B)) (f : Graph A -> Graph B) :
+  EqG B R -> Smart_hom f -> Reduced_hom R f.
 Proof.
   intros H S.
   split.
@@ -53,5 +77,5 @@ Proof.
     reflexivity.
   - intros a b.
     rewrite (smart_hom_overlay A B f a b S).
-    induction (f a).
-    --  *)
+    rewrite (smart_hom_single A B f S).
+*)
