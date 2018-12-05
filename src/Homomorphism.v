@@ -6,7 +6,6 @@ Require Import Omega.
 Require Import Graph.
 
 Class Homomorphism (A B:Type) (f : Graph A -> Graph B) : Prop := {
-  (* Equiv *)
   Hom_Empty :> f (Empty A) = (Empty B) ;
   Hom_Overlay :> forall a b, f (Overlay A a b) = Overlay B (f a) (f b) ;
   Hom_Connect :> forall a b, f (Connect A a b) = Connect B (f a) (f b)
