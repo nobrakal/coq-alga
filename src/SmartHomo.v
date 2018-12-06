@@ -181,26 +181,19 @@ Proof.
       reflexivity.
 Qed.
 
-Program Definition graph_empty_or_not (A:Type) (g:Graph A) : {g=Empty} + {g<>Empty} :=
-  match g with
-  | Empty => in_left
-  | _ => in_right
-  end.
-
-(* Lemma graph_empty_or_notR (A:Type) (R: relation (Graph A)) :
-  EqG A R -> forall (x:Graph A), R x Empty \/ not (R x Empty).
+Lemma graph_empty_or_notR2 (A:Type) (R: relation (Graph A)) :
+  EqG A R -> forall (x y:Graph A), R x Empty \/ R y Empty \/ (not (R x Empty) /\ not (R y Empty)).
 Proof.
-  intros E g.
-  induction g.
-  - refine (or_introl _ ). reflexivity.
-  - destruct (graph_empty_or_not A (Vertex a)).
-  -- rewrite e. refine (or_introl _ ). reflexivity.
-  -- destruct (graph_empty_or_not A Empty).
-  ---
-Admitted.
- *)
-(*
-Theorem smart_hom_is_reduced_hom A B (R: relation (Graph B)) (f : Graph A -> Graph B) :
+  intros E x y.
+  destruct (graph_empty_or_notR A R E x).
+  - refine (or_introl _). exact H.
+  - destruct (graph_empty_or_notR A R E y).
+  -- refine (or_intror _). refine (or_introl _). exact H0.
+  -- refine (or_intror _). refine (or_intror _).
+     split. exact H. exact H0.
+Qed.
+
+(* Theorem smart_hom_is_reduced_hom A B (R: relation (Graph B)) (f : Graph A -> Graph B) :
   EqG B R -> Smart_hom f -> Reduced_hom R f.
 Proof.
   intros H S.
@@ -210,8 +203,8 @@ Proof.
     reflexivity.
   - intros a b.
     rewrite (smart_hom_overlay A B f a b S).
-    destruct (graph_empty_or_not2 B (f a) (f b)).
-   -- rewrite H0.
+    destruct (graph_empty_or_notR2 B R H (f a) (f b)).
+   -- unfold kSimpl. rewrite H0.
       rewrite EqG_PlusCommut.
       rewrite (id_Plus B R (f b) H).
       rewrite (ksimpl_c_left_empty_x B R Connect (f b) H).

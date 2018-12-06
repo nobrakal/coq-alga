@@ -137,3 +137,24 @@ Proof.
   apply (EqG_TimesLeftCong x y g).
   exact r.
 Qed.
+
+Require Coq.Logic.Classical_Prop.
+
+(* Can't come to something without classical *)
+Lemma graph_empty_or_notR (A:Type) (R: relation (Graph A)) :
+  EqG A R -> forall (x:Graph A), R x Empty \/ not (R x Empty).
+Proof.
+  intros E g.
+  apply Classical_Prop.classic.
+Qed.
+
+(* Require Import Coq.Bool.Bool.
+
+Add Parametric Morphism A (R: relation (Graph A)) `(EqG A R) : isEmpty
+  with signature R ==> (fun x y => Is_true (eqb x y))
+    as isEmpty_morph.
+Proof.
+  intros x y r.
+  apply (EqG_PlusRightCong A R H).
+  exact r.
+Qed. *)
