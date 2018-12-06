@@ -74,7 +74,6 @@ Proof. auto. Qed.
 Require Import Coq.Bool.Bool.
 Require Import Setoid.
 
-
 Lemma ksimpl_c_left_empty_x (A : Type) (R: relation (Graph A)) (c : Graph A -> Graph A -> Graph A) (x:Graph A) :
   EqG A R -> R (kSimpl c Empty x) x.
 Proof.
@@ -127,14 +126,80 @@ Proof.
       rewrite andb_false_l.
       reflexivity.
 Qed.
-(* 
+
+(* TODO exact same proof than for ksimpl_c_right_empty_x, there must be a simplification *)
 Lemma ksimpl_c_right_empty_x (A : Type) (R: relation (Graph A)) (c : Graph A -> Graph A -> Graph A) (x:Graph A) :
   EqG A R -> R (kSimpl c x Empty) x.
-Admitted.
+Proof.
+  unfold kSimpl.
+  rewrite isEmpty_empty.
+  intros H.
+  induction x.
+  - simpl. reflexivity.
+  - simpl. reflexivity.
+  - unfold isEmpty.
+    simpl.
+    fold (isEmpty x1).
+    fold (isEmpty x2).
+    destruct (bool_dec (isEmpty x1) true).
+    destruct (bool_dec (isEmpty x2) true).
+   -- rewrite e. rewrite e0.
+      simpl.
+      rewrite e in IHx1. rewrite e0 in IHx2.
+      apply symmetry in IHx2.
+      rewrite IHx2.
+      rewrite (id_Plus A R x1 H).
+      exact IHx1.
+   -- apply not_true_is_false in n.
+      rewrite n.
+      rewrite andb_false_r.
+      reflexivity.
+   -- apply not_true_is_false in n.
+      rewrite n.
+      rewrite andb_false_l.
+      reflexivity.
+  - unfold isEmpty.
+    simpl.
+    fold (isEmpty x1).
+    fold (isEmpty x2).
+    destruct (bool_dec (isEmpty x1) true).
+    destruct (bool_dec (isEmpty x2) true).
+   -- rewrite e. rewrite e0.
+      simpl.
+      rewrite e in IHx1. rewrite e0 in IHx2.
+      apply symmetry in IHx2.
+      rewrite IHx2.
+      rewrite EqG_TimesRightId.
+      exact IHx1.
+   -- apply not_true_is_false in n.
+      rewrite n.
+      rewrite andb_false_r.
+      reflexivity.
+   -- apply not_true_is_false in n.
+      rewrite n.
+      rewrite andb_false_l.
+      reflexivity.
+Qed.
 
-Lemma graph_empty_or_not2 (A:Type) : forall (x y:Graph A), x=Empty \/ y=Empty \/ (x <> Empty /\ y <> Empty).
-Admitted.
+Program Definition graph_empty_or_not (A:Type) (g:Graph A) : {g=Empty} + {g<>Empty} :=
+  match g with
+  | Empty => in_left
+  | _ => in_right
+  end.
 
+(* Lemma graph_empty_or_notR (A:Type) (R: relation (Graph A)) :
+  EqG A R -> forall (x:Graph A), R x Empty \/ not (R x Empty).
+Proof.
+  intros E g.
+  induction g.
+  - refine (or_introl _ ). reflexivity.
+  - destruct (graph_empty_or_not A (Vertex a)).
+  -- rewrite e. refine (or_introl _ ). reflexivity.
+  -- destruct (graph_empty_or_not A Empty).
+  ---
+Admitted.
+ *)
+(*
 Theorem smart_hom_is_reduced_hom A B (R: relation (Graph B)) (f : Graph A -> Graph B) :
   EqG B R -> Smart_hom f -> Reduced_hom R f.
 Proof.
