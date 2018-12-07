@@ -1,13 +1,7 @@
-Require Coq.Logic.FunctionalExtensionality.
-Require Import Coq.Program.Utils.
 Require Import Coq.Program.Basics.
-Require Import Coq.Arith.PeanoNat.
-Require Import Omega.
 
-Require Import Coq.Relations.Relation_Definitions.
-Require Import Coq.Classes.RelationClasses.
+Require Import Coq.Bool.Bool.
 
-Require Import Setoid.
 Require Import Relation_Definitions.
 
 Require Import Graph.
@@ -70,11 +64,6 @@ Proof.
     rewrite (smart_hom_connect A B f g1 g2 S).
     reflexivity.
 Qed.
-
-Lemma isEmpty_empty (A:Type) :isEmpty (Empty (A:=A)) = true.
-Proof. auto. Qed.
-
-Require Import Coq.Bool.Bool.
 
 Lemma r_ov_empty A (R: relation (Graph A)) (a b: Graph A) :
   EqG A R -> R a Empty -> R b Empty -> R (Overlay a b) Empty.
