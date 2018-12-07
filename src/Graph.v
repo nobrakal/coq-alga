@@ -58,9 +58,6 @@ Require Import Coq.Classes.RelationClasses.
 Class EqG (A:Type) (R : relation (Graph A)) : Prop := {
   EqG_Equiv :> Equivalence R;
 
-  (* Empty/Vertex *)
-  EqG_EmptyIsNotVertex :> forall a, not (R Empty (Vertex a));
-
   (* Congruences *)
   EqG_PlusLeftCong :> forall x y z, R x y -> R (Overlay x z) (Overlay y z);
 
