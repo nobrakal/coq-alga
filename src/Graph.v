@@ -56,7 +56,10 @@ Require Import Coq.Classes.RelationClasses.
 *)
 
 Class EqG (A:Type) (R : relation (Graph A)) : Prop := {
-  EqG_Equiv :> Equivalence R ;
+  EqG_Equiv :> Equivalence R;
+
+  (* Empty/Vertex *)
+  EqG_EmptyIsNotVertex :> forall a, not (R Empty (Vertex a));
 
   (* Congruences *)
   EqG_PlusLeftCong :> forall x y z, R x y -> R (Overlay x z) (Overlay y z);
@@ -137,24 +140,3 @@ Proof.
   apply (EqG_TimesLeftCong x y g).
   exact r.
 Qed.
-
-Require Coq.Logic.Classical_Prop.
-
-(* Can't come to something without classical *)
-Lemma graph_empty_or_notR (A:Type) (R: relation (Graph A)) :
-  EqG A R -> forall (x:Graph A), R x Empty \/ not (R x Empty).
-Proof.
-  intros E g.
-  apply Classical_Prop.classic.
-Qed.
-
-(* Require Import Coq.Bool.Bool.
-
-Add Parametric Morphism A (R: relation (Graph A)) `(EqG A R) : isEmpty
-  with signature R ==> (fun x y => Is_true (eqb x y))
-    as isEmpty_morph.
-Proof.
-  intros x y r.
-  apply (EqG_PlusRightCong A R H).
-  exact r.
-Qed. *)

@@ -7,6 +7,9 @@ Require Import Omega.
 Require Import Coq.Relations.Relation_Definitions.
 Require Import Coq.Classes.RelationClasses.
 
+Require Import Setoid.
+Require Import Relation_Definitions.
+
 Require Import Graph.
 Require Import ReducedHomo.
 
@@ -72,128 +75,54 @@ Lemma isEmpty_empty (A:Type) :isEmpty (Empty (A:=A)) = true.
 Proof. auto. Qed.
 
 Require Import Coq.Bool.Bool.
-Require Import Setoid.
 
-Lemma ksimpl_c_left_empty_x (A : Type) (R: relation (Graph A)) (c : Graph A -> Graph A -> Graph A) (x:Graph A) :
-  EqG A R -> R (kSimpl c Empty x) x.
+Lemma r_ov_empty A (R: relation (Graph A)) (a b: Graph A) :
+  EqG A R -> R a Empty -> R b Empty -> R (Overlay a b) Empty.
 Proof.
-  unfold kSimpl.
-  rewrite isEmpty_empty.
-  intros H.
-  induction x.
-  - simpl. reflexivity.
-  - simpl. reflexivity.
-  - unfold isEmpty.
-    simpl.
-    fold (isEmpty x1).
-    fold (isEmpty x2).
-    destruct (bool_dec (isEmpty x1) true).
-    destruct (bool_dec (isEmpty x2) true).
-   -- rewrite e. rewrite e0.
-      simpl.
-      rewrite e in IHx1. rewrite e0 in IHx2.
-      apply symmetry in IHx2.
-      rewrite IHx2.
-      rewrite (id_Plus A R x1 H).
-      exact IHx1.
-   -- apply not_true_is_false in n.
-      rewrite n.
-      rewrite andb_false_r.
-      reflexivity.
-   -- apply not_true_is_false in n.
-      rewrite n.
-      rewrite andb_false_l.
-      reflexivity.
-  - unfold isEmpty.
-    simpl.
-    fold (isEmpty x1).
-    fold (isEmpty x2).
-    destruct (bool_dec (isEmpty x1) true).
-    destruct (bool_dec (isEmpty x2) true).
-   -- rewrite e. rewrite e0.
-      simpl.
-      rewrite e in IHx1. rewrite e0 in IHx2.
-      apply symmetry in IHx2.
-      rewrite IHx2.
-      rewrite EqG_TimesRightId.
-      exact IHx1.
-   -- apply not_true_is_false in n.
-      rewrite n.
-      rewrite andb_false_r.
-      reflexivity.
-   -- apply not_true_is_false in n.
-      rewrite n.
-      rewrite andb_false_l.
-      reflexivity.
+  intros E ra rb.
+  rewrite rb.
+  rewrite (id_Plus A R a E).
+  exact ra.
 Qed.
 
-(* TODO exact same proof than for ksimpl_c_right_empty_x, there must be a simplification *)
-Lemma ksimpl_c_right_empty_x (A : Type) (R: relation (Graph A)) (c : Graph A -> Graph A -> Graph A) (x:Graph A) :
-  EqG A R -> R (kSimpl c x Empty) x.
+Lemma r_co_empty A (R: relation (Graph A)) (a b: Graph A) :
+  EqG A R -> R a Empty -> R b Empty -> R (Connect a b) Empty.
 Proof.
-  unfold kSimpl.
-  rewrite isEmpty_empty.
-  intros H.
-  induction x.
-  - simpl. reflexivity.
-  - simpl. reflexivity.
-  - unfold isEmpty.
-    simpl.
-    fold (isEmpty x1).
-    fold (isEmpty x2).
-    destruct (bool_dec (isEmpty x1) true).
-    destruct (bool_dec (isEmpty x2) true).
-   -- rewrite e. rewrite e0.
-      simpl.
-      rewrite e in IHx1. rewrite e0 in IHx2.
-      apply symmetry in IHx2.
-      rewrite IHx2.
-      rewrite (id_Plus A R x1 H).
-      exact IHx1.
-   -- apply not_true_is_false in n.
-      rewrite n.
-      rewrite andb_false_r.
-      reflexivity.
-   -- apply not_true_is_false in n.
-      rewrite n.
-      rewrite andb_false_l.
-      reflexivity.
-  - unfold isEmpty.
-    simpl.
-    fold (isEmpty x1).
-    fold (isEmpty x2).
-    destruct (bool_dec (isEmpty x1) true).
-    destruct (bool_dec (isEmpty x2) true).
-   -- rewrite e. rewrite e0.
-      simpl.
-      rewrite e in IHx1. rewrite e0 in IHx2.
-      apply symmetry in IHx2.
-      rewrite IHx2.
-      rewrite EqG_TimesRightId.
-      exact IHx1.
-   -- apply not_true_is_false in n.
-      rewrite n.
-      rewrite andb_false_r.
-      reflexivity.
-   -- apply not_true_is_false in n.
-      rewrite n.
-      rewrite andb_false_l.
-      reflexivity.
+  intros E ra rb.
+  rewrite rb.
+  rewrite EqG_TimesRightId.
+  exact ra.
 Qed.
 
-Lemma graph_empty_or_notR2 (A:Type) (R: relation (Graph A)) :
-  EqG A R -> forall (x y:Graph A), R x Empty \/ R y Empty \/ (not (R x Empty) /\ not (R y Empty)).
+Lemma is_empty_R A (R: relation (Graph A)) (g:Graph A): EqG A R -> isEmpty g = true -> R g Empty.
 Proof.
-  intros E x y.
-  destruct (graph_empty_or_notR A R E x).
-  - refine (or_introl _). exact H.
-  - destruct (graph_empty_or_notR A R E y).
-  -- refine (or_intror _). refine (or_introl _). exact H0.
-  -- refine (or_intror _). refine (or_intror _).
-     split. exact H. exact H0.
+  intros E i.
+  induction g.
+  - reflexivity.
+  - discriminate.
+  - unfold isEmpty in i. 
+    rewrite foldg_overlay in i.
+    rewrite andb_true_iff in i.
+    fold (isEmpty g1) in i. fold (isEmpty g2) in i.
+    destruct i.
+    apply IHg1 in H.
+    apply IHg2 in H0.
+    rewrite H0.
+    rewrite (id_Plus A R g1 E).
+    exact H.
+  - unfold isEmpty in i. 
+    rewrite foldg_connect in i.
+    rewrite andb_true_iff in i.
+    fold (isEmpty g1) in i. fold (isEmpty g2) in i.
+    destruct i.
+    apply IHg1 in H.
+    apply IHg2 in H0.
+    rewrite H0.
+    rewrite EqG_TimesRightId.
+    exact H.
 Qed.
 
-(* Theorem smart_hom_is_reduced_hom A B (R: relation (Graph B)) (f : Graph A -> Graph B) :
+Theorem smart_hom_is_reduced_hom A B (R: relation (Graph B)) (f : Graph A -> Graph B) :
   EqG B R -> Smart_hom f -> Reduced_hom R f.
 Proof.
   intros H S.
@@ -203,29 +132,57 @@ Proof.
     reflexivity.
   - intros a b.
     rewrite (smart_hom_overlay A B f a b S).
-    destruct (graph_empty_or_notR2 B R H (f a) (f b)).
-   -- unfold kSimpl. rewrite H0.
+    destruct (bool_dec (isEmpty (f a)) true).
+   -- unfold kSimpl.
+      rewrite e.
+      symmetry.
+      destruct (bool_dec (isEmpty (f b)) true).
+  --- rewrite e0.
+      apply (r_ov_empty B R (f a) (f b) H).
+      apply (is_empty_R B R (f a) H).
+      exact e.
+      apply (is_empty_R B R (f b) H).
+      exact e0.
+  --- rewrite (not_true_is_false (isEmpty (f b)) n).
       rewrite EqG_PlusCommut.
+      rewrite (is_empty_R B R (f a) H e).
       rewrite (id_Plus B R (f b) H).
-      rewrite (ksimpl_c_left_empty_x B R Connect (f b) H).
       reflexivity.
-   -- destruct H0.
-    --- rewrite H0.
-        rewrite (id_Plus B R (f a) H).
-        rewrite (ksimpl_c_right_empty_x B R Overlay (f a) H).
-        reflexivity.
-    --- rewrite (ksimpl_not_empty B Overlay (f a) (f b) H0). reflexivity.
+   -- unfold kSimpl.
+      rewrite (not_true_is_false (isEmpty (f a)) n).
+      destruct (bool_dec (isEmpty (f b)) true).
+  --- rewrite e.
+      rewrite (is_empty_R B R (f b) H e).
+      rewrite (id_Plus B R (f a) H).
+      reflexivity.
+  --- rewrite (not_true_is_false (isEmpty (f b)) n0).
+      reflexivity.
   - intros a b.
     rewrite (smart_hom_connect A B f a b S).
-    destruct (graph_empty_or_not2 B (f a) (f b)).
-   -- rewrite H0.
+    destruct (bool_dec (isEmpty (f a)) true).
+   -- unfold kSimpl.
+      rewrite e.
+      symmetry.
+      destruct (bool_dec (isEmpty (f b)) true).
+  --- rewrite e0.
+      apply (r_co_empty B R (f a) (f b) H).
+      apply (is_empty_R B R (f a) H).
+      exact e.
+      apply (is_empty_R B R (f b) H).
+      exact e0.
+  --- rewrite (not_true_is_false (isEmpty (f b)) n).
+      pose (ne := is_empty_R B R (f a) H e).
+      pose (ok := (EqG_TimesLeftCong (f a) Empty (f b)) ne). (*TODO use rewrite *)
+      transitivity (Connect Empty (f b)). exact ok.
       rewrite EqG_TimesLeftId.
-      rewrite ksimpl_c_left_empty_x.
       reflexivity.
-   -- destruct H0.
-    --- rewrite H0.
-        rewrite EqG_TimesRightId.
-        rewrite ksimpl_c_right_empty_x.
-        reflexivity.
-    --- rewrite (ksimpl_not_empty B Connect (f a) (f b) H0). reflexivity.
-Qed. *)
+   -- unfold kSimpl.
+      rewrite (not_true_is_false (isEmpty (f a)) n).
+      destruct (bool_dec (isEmpty (f b)) true).
+  --- rewrite e.
+      rewrite (is_empty_R B R (f b) H e).
+      rewrite (EqG_TimesRightId (f a)).
+      reflexivity.
+  --- rewrite (not_true_is_false (isEmpty (f b)) n0).
+      reflexivity.
+Qed.
