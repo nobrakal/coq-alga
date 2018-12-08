@@ -138,7 +138,7 @@ Proof.
   induction g.
   - reflexivity.
   - discriminate.
-  - unfold isEmpty in i. 
+  - unfold isEmpty in i.
     rewrite foldg_overlay in i.
     rewrite andb_true_iff in i.
     fold (isEmpty g1) in i. fold (isEmpty g2) in i.
@@ -148,7 +148,7 @@ Proof.
     rewrite H0.
     rewrite (id_Plus A R g1 E).
     exact H.
-  - unfold isEmpty in i. 
+  - unfold isEmpty in i.
     rewrite foldg_connect in i.
     rewrite andb_true_iff in i.
     fold (isEmpty g1) in i. fold (isEmpty g2) in i.
@@ -160,6 +160,7 @@ Proof.
     exact H.
 Qed.
 
+(* A smart homomorphism is a reduced homomorphism *)
 Theorem smart_hom_is_reduced_hom A B (R: relation (Graph B)) (f : Graph A -> Graph B) :
   EqG B R -> Smart_hom f -> Reduced_hom R f.
 Proof.

@@ -44,10 +44,10 @@ Definition const_empty {A B:Type} (g:Graph A) : Graph B :=
 Lemma const_empty_is_empty (A B: Type) (g:Graph A) : const_empty (A:=A) (B:=B) g = Empty.
 Proof.
   induction g.
-  - compute. reflexivity.
-  - compute. reflexivity.
-  - compute. reflexivity.
-  - compute. reflexivity.
+  - auto.
+  - auto.
+  - auto.
+  - auto.
 Qed.
 
 Theorem const_empty_is_reduced_hom (A B : Type) (R: relation (Graph B)) :
