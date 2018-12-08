@@ -171,62 +171,49 @@ Proof.
     reflexivity.
   - intros a b.
     rewrite (smart_hom_overlay A B f a b S).
-    destruct (bool_dec (isEmpty (f a)) true).
-   -- unfold kSimpl.
-      rewrite e.
+    unfold kSimpl.
+    destruct (bool_dec (isEmpty (f a)) true); destruct (bool_dec (isEmpty (f b)) true).
+   -- rewrite e. rewrite e0.
       symmetry.
-      destruct (bool_dec (isEmpty (f b)) true).
-  --- rewrite e0.
       apply (r_ov_empty B R (f a) (f b) H).
-      apply (is_empty_R B R (f a) H).
-      exact e.
-      apply (is_empty_R B R (f b) H).
-      exact e0.
-  --- rewrite (not_true_is_false (isEmpty (f b)) n).
+      apply (is_empty_R B R (f a) H). exact e.
+      apply (is_empty_R B R (f b) H). exact e0.
+   -- rewrite e. rewrite (not_true_is_false (isEmpty (f b)) n).
       rewrite EqG_PlusCommut.
       rewrite (is_empty_R B R (f a) H e).
       rewrite (id_Plus B R (f b) H).
       reflexivity.
-   -- unfold kSimpl.
-      rewrite (not_true_is_false (isEmpty (f a)) n).
-      destruct (bool_dec (isEmpty (f b)) true).
-  --- rewrite e.
+   -- rewrite (not_true_is_false (isEmpty (f a)) n). rewrite e.
       rewrite (is_empty_R B R (f b) H e).
       rewrite (id_Plus B R (f a) H).
       reflexivity.
-  --- rewrite (not_true_is_false (isEmpty (f b)) n0).
+   -- rewrite (not_true_is_false (isEmpty (f a)) n).
+      rewrite (not_true_is_false (isEmpty (f b)) n0).
       reflexivity.
   - intros a b.
     rewrite (smart_hom_connect A B f a b S).
-    destruct (bool_dec (isEmpty (f a)) true).
-   -- unfold kSimpl.
-      rewrite e.
+    unfold kSimpl.
+    destruct (bool_dec (isEmpty (f a)) true); destruct (bool_dec (isEmpty (f b)) true).
+   -- rewrite e. rewrite e0.
       symmetry.
-      destruct (bool_dec (isEmpty (f b)) true).
-  --- rewrite e0.
       apply (r_co_empty B R (f a) (f b) H).
-      apply (is_empty_R B R (f a) H).
-      exact e.
-      apply (is_empty_R B R (f b) H).
-      exact e0.
-  --- rewrite (not_true_is_false (isEmpty (f b)) n).
+      apply (is_empty_R B R (f a) H). exact e.
+      apply (is_empty_R B R (f b) H). exact e0.
+   -- rewrite e. rewrite (not_true_is_false (isEmpty (f b)) n).
       pose (ne := is_empty_R B R (f a) H e).
       pose (ok := (EqG_TimesLeftCong (f a) Empty (f b)) ne). (*TODO use rewrite *)
-      transitivity (Connect Empty (f b)). exact ok.
-      rewrite EqG_TimesLeftId.
-      reflexivity.
-   -- unfold kSimpl.
-      rewrite (not_true_is_false (isEmpty (f a)) n).
-      destruct (bool_dec (isEmpty (f b)) true).
-  --- rewrite e.
+      transitivity (Connect Empty (f b)).
+      rewrite EqG_TimesLeftId. reflexivity.
+      rewrite ok. rewrite EqG_TimesLeftId. reflexivity.
+   -- rewrite (not_true_is_false (isEmpty (f a)) n). rewrite e.
       rewrite (is_empty_R B R (f b) H e).
-      rewrite (EqG_TimesRightId (f a)).
+      rewrite EqG_TimesRightId.
       reflexivity.
-  --- rewrite (not_true_is_false (isEmpty (f b)) n0).
+   -- rewrite (not_true_is_false (isEmpty (f a)) n).
+      rewrite (not_true_is_false (isEmpty (f b)) n0).
       reflexivity.
 Qed.
 
-(* TODO Seems like smart_hom_empty *)
 Lemma smart_hom_e A B (f : Graph A -> Graph B) (x : Graph A) :
   Smart_hom f -> isEmpty x = true -> f x = Empty.
 Proof.
@@ -243,10 +230,8 @@ Proof.
     fold (isEmpty x2) in i.
     rewrite andb_true_iff in i.
     destruct i as (i1,i2).
-    apply IHx1 in i1.
-    apply IHx2 in i2.
-    rewrite i1.
-    rewrite i2.
+    apply IHx1 in i1. rewrite i1.
+    apply IHx2 in i2. rewrite i2.
     auto.
   - rewrite foldg_connect.
     unfold isEmpty in i.
@@ -255,10 +240,8 @@ Proof.
     fold (isEmpty x2) in i.
     rewrite andb_true_iff in i.
     destruct i as (i1,i2).
-    apply IHx1 in i1.
-    apply IHx2 in i2.
-    rewrite i1.
-    rewrite i2.
+    apply IHx1 in i1. rewrite i1.
+    apply IHx2 in i2. rewrite i2.
     auto.
 Qed.
 
