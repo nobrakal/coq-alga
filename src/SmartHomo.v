@@ -245,6 +245,43 @@ Proof.
     auto.
 Qed.
 
+Lemma isEmpty_kSimpl A c (x y : Graph A) :
+   c = Overlay \/ c = Connect -> isEmpty (kSimpl c x y) = true -> isEmpty x = true /\ isEmpty y = true.
+Proof.
+  intros H i.
+  unfold kSimpl in i.
+  destruct (bool_dec (isEmpty x) true); destruct (bool_dec (isEmpty y) true).
+  - rewrite e. rewrite e0. auto.
+  - rewrite e.
+    split. auto.
+    rewrite e in i.
+    rewrite (not_true_is_false (isEmpty y) n) in i.
+    exact i.
+  - rewrite e.
+    split. auto.
+    rewrite e in i.
+    rewrite (not_true_is_false (isEmpty x) n) in i.
+    exact i. auto.
+  - rewrite (not_true_is_false (isEmpty x) n) in i.
+    rewrite (not_true_is_false (isEmpty y) n0) in i.
+    destruct H.
+ -- rewrite H in i.
+    unfold isEmpty in i.
+    rewrite foldg_overlay in i.
+    fold (isEmpty x) in i. fold (isEmpty y) in i.
+    rewrite andb_true_iff in i.
+    exact i.
+ -- rewrite H in i.
+    unfold isEmpty in i.
+    rewrite foldg_connect in i.
+    fold (isEmpty x) in i. fold (isEmpty y) in i.
+    rewrite andb_true_iff in i.
+    exact i.
+Qed.
+
+Lemma ovov A : Overlay (A:=A) = Overlay. Proof. auto. Qed.
+Lemma coco A : Connect (A:=A) = Connect. Proof. auto. Qed.
+
 Lemma smart_hom_ee A (x : Graph A) :
  isEmpty (dropEmpty x) = true -> dropEmpty x = Empty.
 Proof.
@@ -260,32 +297,10 @@ Proof.
     rewrite foldg_overlay in H.
     fold (dropEmpty x1) in H.
     fold (dropEmpty x2) in H.
-    destruct (bool_dec (isEmpty (dropEmpty x1)) true).
- -- unfold kSimpl. rewrite e.
-    destruct (bool_dec (isEmpty (dropEmpty x2)) true).
---- rewrite e0. reflexivity.
---- unfold kSimpl in H.
-    rewrite e in H.
-    rewrite (not_true_is_false (isEmpty (dropEmpty x2)) n) in H.
-    apply (not_true_is_false (isEmpty (dropEmpty x2))) in n.
-    rewrite n in H.
-    discriminate H.
- -- unfold kSimpl in H.
-    rewrite (not_true_is_false (isEmpty (dropEmpty x1)) n) in H. (* TODO *)
-    apply (not_true_is_false (isEmpty (dropEmpty x1))) in n.
-    destruct (bool_dec (isEmpty (dropEmpty x2)) true).
---- rewrite e in H.
-    rewrite n in H.
-    discriminate H.
---- rewrite (not_true_is_false (isEmpty (dropEmpty x2)) n0) in H.
-    apply (not_true_is_false (isEmpty (dropEmpty x2))) in n0.
-    unfold isEmpty in H.
-    rewrite foldg_overlay in H.
-    rewrite andb_true_iff in H.
-    destruct H as (H,_).
-    fold (isEmpty (dropEmpty x1)) in H.
-    rewrite n in H.
-    discriminate H.
+    destruct (isEmpty_kSimpl A Overlay (dropEmpty x1) (dropEmpty x2) (or_introl (ovov A)) H) as (H1,H2).
+    apply IHx1 in H1. rewrite H1.
+    apply IHx2 in H2. rewrite H2.
+    auto.
   - unfold dropEmpty.
     rewrite foldg_connect.
     fold (dropEmpty x1).
@@ -294,32 +309,10 @@ Proof.
     rewrite foldg_connect in H.
     fold (dropEmpty x1) in H.
     fold (dropEmpty x2) in H.
-    destruct (bool_dec (isEmpty (dropEmpty x1)) true).
- -- unfold kSimpl. rewrite e.
-    destruct (bool_dec (isEmpty (dropEmpty x2)) true).
---- rewrite e0. reflexivity.
---- unfold kSimpl in H.
-    rewrite e in H.
-    rewrite (not_true_is_false (isEmpty (dropEmpty x2)) n) in H.
-    apply (not_true_is_false (isEmpty (dropEmpty x2))) in n.
-    rewrite n in H.
-    discriminate H.
- -- unfold kSimpl in H.
-    rewrite (not_true_is_false (isEmpty (dropEmpty x1)) n) in H. (* TODO *)
-    apply (not_true_is_false (isEmpty (dropEmpty x1))) in n.
-    destruct (bool_dec (isEmpty (dropEmpty x2)) true).
---- rewrite e in H.
-    rewrite n in H.
-    discriminate H.
---- rewrite (not_true_is_false (isEmpty (dropEmpty x2)) n0) in H.
-    apply (not_true_is_false (isEmpty (dropEmpty x2))) in n0.
-    unfold isEmpty in H.
-    rewrite foldg_connect in H.
-    rewrite andb_true_iff in H.
-    destruct H as (H,_).
-    fold (isEmpty (dropEmpty x1)) in H.
-    rewrite n in H.
-    discriminate H.
+    destruct (isEmpty_kSimpl A Connect (dropEmpty x1) (dropEmpty x2) (or_intror (coco A)) H) as (H1,H2).
+    apply IHx1 in H1. rewrite H1.
+    apply IHx2 in H2. rewrite H2.
+    auto.
 Qed.
 
 Theorem smart_hom_compo A B C (s1 : Graph A -> Graph B) (s2 : Graph B -> Graph C):
