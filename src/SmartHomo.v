@@ -8,6 +8,8 @@ Require Import Relation_Definitions.
 Require Import Graph.
 Require Import ReducedHomo.
 
+Open Scope program_scope.
+
 Definition kSimpl {A: Type} (c : Graph A -> Graph A -> Graph A) (x y:Graph A) :=
   if isEmpty x
   then if isEmpty y
@@ -22,8 +24,9 @@ Definition dropEmpty {A:Type} (g:Graph A) := foldg Empty Vertex (kSimpl Overlay)
 Definition induce {A:Type} (pred : A -> bool) (g:Graph A) :=
   foldg Empty (fun x => if pred x then Vertex x else Empty) (kSimpl Overlay) (kSimpl Connect) g.
 
+(* A smart homomorphism is a graph morphism where you have removed empty leaves *)
 Definition Smart_hom {A B:Type} (f : Graph A -> Graph B) : Prop :=
-  f = compose dropEmpty (bind (compose f Vertex)).
+  f = dropEmpty ∘ (bind (compose f Vertex)).
 
 Lemma smart_hom_empty (A B: Type) (f : Graph A -> Graph B) : Smart_hom f -> f Empty = Empty.
 Proof.
@@ -48,6 +51,7 @@ Proof.
   reflexivity.
 Qed.
 
+(* A smart homomorphism is a foldg-function *)
 Theorem smart_hom_single (A B:Type) (f : Graph A -> Graph B) :
   Smart_hom f -> f = foldg Empty (fun v => f (Vertex v)) (kSimpl Overlay) (kSimpl Connect).
 Proof.
@@ -336,7 +340,7 @@ Qed.
 
 Theorem smart_hom_compo A B C (s1 : Graph A -> Graph B) (s2 : Graph B -> Graph C):
  (Smart_hom s1) /\ (Smart_hom s2) ->
-  compose s2 s1 = foldg Empty (compose s2 (compose s1 Vertex)) (kSimpl Overlay) (kSimpl Connect).
+  s2 ∘ s1 = foldg Empty (s2 ∘ s1 ∘ Vertex) (kSimpl Overlay) (kSimpl Connect).
 Proof.
   intros H.
   destruct H as (H1,H2).

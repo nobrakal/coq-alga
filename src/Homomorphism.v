@@ -5,22 +5,25 @@ Require Import Omega.
 
 Require Import Graph.
 
+Open Scope program_scope.
+
+(* An homomorphism is a morphism preserving the graph structure *)
 Class Homomorphism {A B:Type} (f : Graph A -> Graph B) : Prop := {
   Hom_Empty :> f Empty = Empty;
   Hom_Overlay :> forall a b, f (Overlay a b) = Overlay (f a) (f b) ;
   Hom_Connect :> forall a b, f (Connect a b) = Connect (f a) (f b)
  }.
 
-Lemma bind_is_hom : forall A B (f: A -> Graph B), Homomorphism (bind f).
+Lemma bind_is_hom A B (f: A -> Graph B): Homomorphism (bind f).
 Proof.
   intros.
   repeat split.
 Qed.
 
-Lemma hom_is_bind : forall A B (hom: Graph A -> Graph B),
-  (Homomorphism hom) -> hom = (bind (compose hom Vertex)).
+Lemma hom_is_bind A B (hom: Graph A -> Graph B):
+  Homomorphism hom -> hom = bind (hom ∘ Vertex).
 Proof.
-  intros A B hom H.
+  intros H.
   apply FunctionalExtensionality.functional_extensionality.
   intro g.
   induction g.
@@ -36,8 +39,9 @@ Proof.
     auto.
 Qed.
 
+(* Homomorphisms are exactly bind-functions *)
 Theorem equiv_bind_hom A B (f : Graph A -> Graph B) :
-  ((Homomorphism f) <-> f = (bind (compose f Vertex))).
+  Homomorphism f <-> f = bind (f ∘ Vertex).
 Proof.
   intros.
   split.
@@ -48,10 +52,10 @@ Proof.
     apply bind_is_hom.
 Qed.
 
-Theorem foldg_bind : forall A B C (e : C) (v: B -> C) (o:C -> C -> C) (c:C -> C -> C) (f_v : A -> Graph B),
-  compose (foldg e v o c) (bind f_v) = foldg e (compose (foldg e v o c) f_v) o c.
+(* The composition of a foldg function and a graph homorphism is a foldg-function *)
+Theorem foldg_bind A B C (e : C) (v: B -> C) (o:C -> C -> C) (c:C -> C -> C) (f_v : A -> Graph B):
+  foldg e v o c ∘ bind f_v = foldg e (foldg e v o c ∘ f_v) o c.
 Proof.
-  intros A B C e v o c f_v.
   apply FunctionalExtensionality.functional_extensionality.
   intro g.
   unfold compose.
@@ -72,11 +76,12 @@ Proof.
     reflexivity.
 Qed.
 
-Theorem bind_compo : forall A B C (hom1 : Graph A -> Graph B) (hom2 : Graph B -> Graph C),
+(* The composition of two graphs homomorphisms is a graph homomorphism *)
+Theorem bind_compo A B C (hom1 : Graph A -> Graph B) (hom2 : Graph B -> Graph C):
  (Homomorphism hom1) /\ (Homomorphism hom2) -> 
-  compose hom2 hom1 = bind (compose hom2 (compose hom1 Vertex)).
+  hom2 ∘ hom1 = bind (hom2 ∘ hom1 ∘ Vertex).
 Proof.
-  intros A B C hom1 hom2 H.
+  intros H.
   destruct H as (H1,H2).
   rewrite (hom_is_bind B C hom2 H2).
   rewrite (hom_is_bind A B hom1 H1).

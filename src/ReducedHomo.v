@@ -15,6 +15,7 @@ Class Reduced_hom {A B : Type} (R: relation (Graph B)) (f : Graph A -> Graph B) 
   RHom_Connect :> forall a b, R (f (Connect a b)) (Connect (f a) (f b))
  }.
 
+(* A graph homomorphism is a reduced homorphism *)
 Theorem hom_is_reduced_hom (A B:Type) (R: relation (Graph B)) (f : Graph A -> Graph B) :
   EqG B R -> Homomorphism f -> Reduced_hom R f.
 Proof.
@@ -73,6 +74,7 @@ Proof. auto. Qed.
 Lemma size1 (A B:Type) : size (A:=B) (const_empty (A:=A) (Overlay Empty Empty)) = 1.
 Proof. auto. Qed.
 
+(* It exists a reduced graph morphisms that is not a graph homomorphism *)
 Theorem const_empty_is_not_hom (A B : Type) : not (Homomorphism (A:=A) (B:=B) const_empty).
 Proof.
   unfold not.
