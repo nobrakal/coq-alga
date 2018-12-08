@@ -19,6 +19,9 @@ Definition kSimpl {A: Type} (c : Graph A -> Graph A -> Graph A) (x y:Graph A) :=
 
 Definition dropEmpty {A:Type} (g:Graph A) := foldg Empty Vertex (kSimpl Overlay) (kSimpl Connect) g.
 
+Definition induce {A:Type} (pred : A -> bool) (g:Graph A) :=
+  foldg Empty (fun x => if pred x then Vertex x else Empty) (kSimpl Overlay) (kSimpl Connect) g.
+
 Definition Smart_hom {A B:Type} (f : Graph A -> Graph B) : Prop :=
   f = compose dropEmpty (bind (compose f Vertex)).
 
@@ -64,6 +67,47 @@ Proof.
     rewrite (eq_sym IHg2).
     rewrite (smart_hom_connect A B f g1 g2 S).
     reflexivity.
+Qed.
+
+Lemma f_inside_if A B (f : A -> B) (x:bool) (a1 a2:A) : f (if x then a1 else a2) = if x then f a1 else f a2.
+Proof.
+  induction x.
+  - auto.
+  - auto.
+Qed.
+
+Theorem induce_smart_hom (A:Type) (pred : A -> bool) : Smart_hom (induce pred).
+Proof.
+  unfold Smart_hom.
+  apply FunctionalExtensionality.functional_extensionality.
+  intro x.
+  induction x.
+  - auto.
+  - unfold compose.
+    unfold bind.
+    unfold induce.
+    unfold foldg.
+    rewrite (f_inside_if (Graph A) (Graph A) dropEmpty (pred a)).
+    unfold dropEmpty.
+    unfold foldg. reflexivity.
+  - unfold induce.
+    unfold compose.
+    unfold dropEmpty.
+    rewrite foldg_overlay.
+    fold (induce pred x1).
+    rewrite IHx1.
+    fold (induce pred x2).
+    rewrite IHx2.
+    auto.
+  - unfold induce.
+    unfold compose.
+    unfold dropEmpty.
+    rewrite foldg_connect.
+    fold (induce pred x1).
+    rewrite IHx1.
+    fold (induce pred x2).
+    rewrite IHx2.
+    auto.
 Qed.
 
 Lemma r_ov_empty A (R: relation (Graph A)) (a b: Graph A) :
