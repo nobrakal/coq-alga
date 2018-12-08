@@ -42,12 +42,6 @@ Require Import Coq.Relations.Relation_Definitions.
 Require Import Coq.Classes.RelationClasses.
 
 (*
-    -- Congruence
-    +left-congruence  : ∀ {x y z : Graph A} -> x ≡ y -> x + z ≡ y + z
-    -- +right-congruence holds as a theorem, please see below
-    *left-congruence  : ∀ {x y z : Graph A} -> x ≡ y -> x * z ≡ y * z
-    *right-congruence : ∀ {x y z : Graph A} -> x ≡ y -> z * x ≡ z * y
-
     -- Other axioms
     left-distributivity  : ∀ {x y z : Graph A} -> x * (y + z) ≡ x * y + x * z
     right-distributivity : ∀ {x y z : Graph A} -> (x + y) * z ≡ x * z + y * z
