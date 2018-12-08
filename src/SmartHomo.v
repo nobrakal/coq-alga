@@ -1,3 +1,4 @@
+Require Coq.Logic.FunctionalExtensionality.
 Require Import Coq.Program.Basics.
 
 Require Import Coq.Bool.Bool.
@@ -18,7 +19,7 @@ Definition kSimpl {A: Type} (c : Graph A -> Graph A -> Graph A) (x y:Graph A) :=
 
 Definition dropEmpty {A:Type} (g:Graph A) := foldg Empty Vertex (kSimpl Overlay) (kSimpl Connect) g.
 
-Definition Smart_hom {A B:Type} (f : Graph A -> Graph B) : Prop := 
+Definition Smart_hom {A B:Type} (f : Graph A -> Graph B) : Prop :=
   f = compose dropEmpty (bind (compose f Vertex)).
 
 Lemma smart_hom_empty (A B: Type) (f : Graph A -> Graph B) : Smart_hom f -> f Empty = Empty.
@@ -174,4 +175,221 @@ Proof.
       reflexivity.
   --- rewrite (not_true_is_false (isEmpty (f b)) n0).
       reflexivity.
+Qed.
+
+(* TODO Seems like smart_hom_empty *)
+Lemma smart_hom_e A B (f : Graph A -> Graph B) (x : Graph A) :
+  Smart_hom f -> isEmpty x = true -> f x = Empty.
+Proof.
+  intros S i.
+  rewrite (smart_hom_single A B f S).
+  induction x.
+  - auto.
+  - compute in i.
+    discriminate i.
+  - rewrite foldg_overlay.
+    unfold isEmpty in i.
+    rewrite foldg_overlay in i.
+    fold (isEmpty x1) in i.
+    fold (isEmpty x2) in i.
+    rewrite andb_true_iff in i.
+    destruct i as (i1,i2).
+    apply IHx1 in i1.
+    apply IHx2 in i2.
+    rewrite i1.
+    rewrite i2.
+    auto.
+  - rewrite foldg_connect.
+    unfold isEmpty in i.
+    rewrite foldg_connect in i.
+    fold (isEmpty x1) in i.
+    fold (isEmpty x2) in i.
+    rewrite andb_true_iff in i.
+    destruct i as (i1,i2).
+    apply IHx1 in i1.
+    apply IHx2 in i2.
+    rewrite i1.
+    rewrite i2.
+    auto.
+Qed.
+
+Lemma smart_hom_ee A (x : Graph A) :
+ isEmpty (dropEmpty x) = true -> dropEmpty x = Empty.
+Proof.
+  intros H.
+  induction x.
+  - auto.
+  - compute in H. discriminate H.
+  - unfold dropEmpty.
+    rewrite foldg_overlay.
+    fold (dropEmpty x1).
+    fold (dropEmpty x2).
+    unfold dropEmpty in H.
+    rewrite foldg_overlay in H.
+    fold (dropEmpty x1) in H.
+    fold (dropEmpty x2) in H.
+    destruct (bool_dec (isEmpty (dropEmpty x1)) true).
+ -- unfold kSimpl. rewrite e.
+    destruct (bool_dec (isEmpty (dropEmpty x2)) true).
+--- rewrite e0. reflexivity.
+--- unfold kSimpl in H.
+    rewrite e in H.
+    rewrite (not_true_is_false (isEmpty (dropEmpty x2)) n) in H.
+    apply (not_true_is_false (isEmpty (dropEmpty x2))) in n.
+    rewrite n in H.
+    discriminate H.
+ -- unfold kSimpl in H.
+    rewrite (not_true_is_false (isEmpty (dropEmpty x1)) n) in H. (* TODO *)
+    apply (not_true_is_false (isEmpty (dropEmpty x1))) in n.
+    destruct (bool_dec (isEmpty (dropEmpty x2)) true).
+--- rewrite e in H.
+    rewrite n in H.
+    discriminate H.
+--- rewrite (not_true_is_false (isEmpty (dropEmpty x2)) n0) in H.
+    apply (not_true_is_false (isEmpty (dropEmpty x2))) in n0.
+    unfold isEmpty in H.
+    rewrite foldg_overlay in H.
+    rewrite andb_true_iff in H.
+    destruct H as (H,_).
+    fold (isEmpty (dropEmpty x1)) in H.
+    rewrite n in H.
+    discriminate H.
+  - unfold dropEmpty.
+    rewrite foldg_connect.
+    fold (dropEmpty x1).
+    fold (dropEmpty x2).
+    unfold dropEmpty in H.
+    rewrite foldg_connect in H.
+    fold (dropEmpty x1) in H.
+    fold (dropEmpty x2) in H.
+    destruct (bool_dec (isEmpty (dropEmpty x1)) true).
+ -- unfold kSimpl. rewrite e.
+    destruct (bool_dec (isEmpty (dropEmpty x2)) true).
+--- rewrite e0. reflexivity.
+--- unfold kSimpl in H.
+    rewrite e in H.
+    rewrite (not_true_is_false (isEmpty (dropEmpty x2)) n) in H.
+    apply (not_true_is_false (isEmpty (dropEmpty x2))) in n.
+    rewrite n in H.
+    discriminate H.
+ -- unfold kSimpl in H.
+    rewrite (not_true_is_false (isEmpty (dropEmpty x1)) n) in H. (* TODO *)
+    apply (not_true_is_false (isEmpty (dropEmpty x1))) in n.
+    destruct (bool_dec (isEmpty (dropEmpty x2)) true).
+--- rewrite e in H.
+    rewrite n in H.
+    discriminate H.
+--- rewrite (not_true_is_false (isEmpty (dropEmpty x2)) n0) in H.
+    apply (not_true_is_false (isEmpty (dropEmpty x2))) in n0.
+    unfold isEmpty in H.
+    rewrite foldg_connect in H.
+    rewrite andb_true_iff in H.
+    destruct H as (H,_).
+    fold (isEmpty (dropEmpty x1)) in H.
+    rewrite n in H.
+    discriminate H.
+Qed.
+
+Lemma smart_hom_compo A B C (s1 : Graph A -> Graph B) (s2 : Graph B -> Graph C):
+ (Smart_hom s1) /\ (Smart_hom s2) ->
+  compose s2 s1 = foldg Empty (compose s2 (compose s1 Vertex)) (kSimpl Overlay) (kSimpl Connect).
+Proof.
+  intros H.
+  destruct H as (H1,H2).
+  rewrite (smart_hom_single A B s1 H1).
+  rewrite (smart_hom_single A B s1 H1) in H1.
+  remember (foldg Empty (fun v : A => s1 (Vertex v)) (kSimpl Overlay) (kSimpl Connect)) as f1.
+  rewrite (smart_hom_single B C s2 H2).
+  rewrite (smart_hom_single B C s2 H2) in H2.
+  remember (foldg Empty (fun v : B => s2 (Vertex v)) (kSimpl Overlay) (kSimpl Connect)) as f2.
+  apply FunctionalExtensionality.functional_extensionality.
+  intros g.
+  unfold compose.
+  induction g.
+  - rewrite Heqf1. rewrite Heqf2. auto.
+  - rewrite Heqf1. rewrite Heqf2. auto.
+  - rewrite Heqf1.
+    repeat rewrite foldg_overlay.
+    rewrite (eq_sym Heqf1).
+    rewrite (eq_sym IHg1). rewrite (eq_sym IHg2).
+    destruct (bool_dec (isEmpty (f1 g1)) true).
+ -- unfold kSimpl.
+    rewrite e.
+    rewrite (smart_hom_e B C f2 (f1 g1) H2 e).
+    simpl.
+    destruct (bool_dec (isEmpty (f1 g2)) true).
+--- rewrite e0.
+    rewrite (smart_hom_e B C f2 (f1 g2) H2 e0).
+    rewrite (smart_hom_empty B C f2 H2).
+    auto.
+--- rewrite (not_true_is_false (isEmpty (f1 g2)) n).
+    destruct (bool_dec (isEmpty (f2 (f1 g2))) true).
+  + rewrite e0.
+    rewrite H2.
+    unfold compose.
+    apply (smart_hom_ee C).
+    fold (compose f2 Vertex).
+    fold (compose dropEmpty (bind (compose f2 Vertex)) (f1 g2)).
+    rewrite (eq_sym H2).
+    exact e0.
+  + rewrite (not_true_is_false (isEmpty (f2 (f1 g2))) n0). reflexivity.
+ -- unfold kSimpl.
+    rewrite (not_true_is_false (isEmpty (f1 g1)) n).
+    destruct (bool_dec (isEmpty (f1 g2)) true).
+--- rewrite e.
+    rewrite (smart_hom_e B C f2 (f1 g2) H2 e). simpl.
+    destruct (bool_dec (isEmpty (f2 (f1 g1))) true).
+  + rewrite e0.
+    rewrite H2.
+    unfold compose.
+    apply (smart_hom_ee C).
+    fold (compose f2 Vertex).
+    fold (compose dropEmpty (bind (compose f2 Vertex)) (f1 g1)).
+    rewrite (eq_sym H2).
+    exact e0.
+  + rewrite (not_true_is_false (isEmpty (f2 (f1 g1))) n0). reflexivity.
+--- rewrite (not_true_is_false (isEmpty (f1 g2)) n0).
+    rewrite (smart_hom_overlay B C f2 (f1 g1) (f1 g2) H2). auto.
+  - rewrite Heqf1.
+    repeat rewrite foldg_connect.
+    rewrite (eq_sym Heqf1).
+    rewrite (eq_sym IHg1). rewrite (eq_sym IHg2).
+    destruct (bool_dec (isEmpty (f1 g1)) true).
+ -- unfold kSimpl.
+    rewrite e.
+    rewrite (smart_hom_e B C f2 (f1 g1) H2 e).
+    simpl.
+    destruct (bool_dec (isEmpty (f1 g2)) true).
+--- rewrite e0.
+    rewrite (smart_hom_e B C f2 (f1 g2) H2 e0).
+    rewrite (smart_hom_empty B C f2 H2).
+    auto.
+--- rewrite (not_true_is_false (isEmpty (f1 g2)) n).
+    destruct (bool_dec (isEmpty (f2 (f1 g2))) true).
+  + rewrite e0.
+    rewrite H2.
+    unfold compose.
+    apply (smart_hom_ee C).
+    fold (compose f2 Vertex).
+    fold (compose dropEmpty (bind (compose f2 Vertex)) (f1 g2)).
+    rewrite (eq_sym H2).
+    exact e0.
+  + rewrite (not_true_is_false (isEmpty (f2 (f1 g2))) n0). reflexivity.
+ -- unfold kSimpl.
+    rewrite (not_true_is_false (isEmpty (f1 g1)) n).
+    destruct (bool_dec (isEmpty (f1 g2)) true).
+--- rewrite e.
+    rewrite (smart_hom_e B C f2 (f1 g2) H2 e). simpl.
+    destruct (bool_dec (isEmpty (f2 (f1 g1))) true).
+  + rewrite e0.
+    rewrite H2.
+    unfold compose.
+    apply (smart_hom_ee C).
+    fold (compose f2 Vertex).
+    fold (compose dropEmpty (bind (compose f2 Vertex)) (f1 g1)).
+    rewrite (eq_sym H2).
+    exact e0.
+  + rewrite (not_true_is_false (isEmpty (f2 (f1 g1))) n0). reflexivity.
+--- rewrite (not_true_is_false (isEmpty (f1 g2)) n0).
+    rewrite (smart_hom_connect B C f2 (f1 g1) (f1 g2) H2). auto.
 Qed.
