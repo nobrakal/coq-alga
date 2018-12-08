@@ -315,6 +315,7 @@ Proof.
     auto.
 Qed.
 
+(* You can compose two smart homomorphism *)
 Theorem smart_hom_compo A B C (s1 : Graph A -> Graph B) (s2 : Graph B -> Graph C):
  (Smart_hom s1) /\ (Smart_hom s2) ->
   s2 ∘ s1 = foldg Empty (s2 ∘ s1 ∘ Vertex) (kSimpl Overlay) (kSimpl Connect).
