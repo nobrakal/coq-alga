@@ -1,5 +1,10 @@
 Require Import Coq.Program.Basics.
+
+Require Import Setoid.
+
+Require Import Relation_Definitions.
 Require Import Coq.Classes.RelationClasses.
+Require Import Coq.Relations.Relation_Definitions.
 
 Inductive Graph A :=
   | Empty : Graph A
@@ -38,15 +43,10 @@ Lemma foldg_connect : forall A B (e:B) (v:A -> B) (o:B -> B -> B) (c:B -> B -> B
   foldg e v o c (Connect a b) = c (foldg e v o c a) (foldg e v o c b).
 Proof. auto. Qed.
 
-Require Import Coq.Relations.Relation_Definitions.
-Require Import Coq.Classes.RelationClasses.
-
 (*
     -- Other axioms
     left-distributivity  : ∀ {x y z : Graph A} -> x * (y + z) ≡ x * y + x * z
     right-distributivity : ∀ {x y z : Graph A} -> (x + y) * z ≡ x * z + y * z
-    decomposition : ∀ {x y z : Graph A} -> x * y * z ≡ x * y + x * z + y * z
-
 *)
 
 Class EqG (A:Type) (R : relation (Graph A)) : Prop := {
@@ -66,6 +66,10 @@ Class EqG (A:Type) (R : relation (Graph A)) : Prop := {
   EqG_TimesLeftId  :> forall x, R (Connect Empty x) x ;
   EqG_TimesRightId :> forall x, R (Connect x Empty) x ;
   EqG_TimesAssoc :> forall x y z, R (Connect x (Connect y z)) (Connect (Connect x y) z);
+
+  (* Others axioms *)
+  EqG_decomposition : forall x y z,
+    R (Connect x (Connect y z)) (Overlay (Connect x y) (Overlay (Connect x z) (Connect y z)))
  }.
 
 Require Import Coq.Setoids.Setoid.
@@ -87,15 +91,6 @@ Proof.
   destruct H.
   reflexivity.
 Qed.
-
-Theorem id_Plus (A:Type) (R:relation (Graph A)) (x:Graph A) : EqG A R -> R (Overlay x Empty) x.
-Proof.
-Admitted.
-
-(* For Rewrite *)
-Require Import Setoid.
-Require Import Relation_Definitions.
-Require Import Coq.Classes.RelationClasses.
 
 Add Parametric Morphism A (R: relation (Graph A)) `(EqG A R) : Overlay
   with signature R ==> R ==> R
@@ -119,4 +114,37 @@ Proof.
   transitivity (Connect x y').
   exact r'.
   exact r.
+Qed.
+
+Theorem pre_idempotence_Plus (A:Type) (R:relation (Graph A)) (x:Graph A):
+  EqG A R -> R (Overlay x (Overlay x Empty)) x.
+Proof.
+  intros E.
+  rewrite (symmetry (EqG_TimesRightId x)) at 1 2.
+  rewrite (symmetry (EqG_TimesRightId Empty)) at 3.
+  rewrite (symmetry (EqG_decomposition x Empty Empty)).
+  rewrite EqG_TimesRightId.
+  rewrite EqG_TimesRightId.
+  reflexivity.
+Qed.
+
+Theorem id_Plus (A:Type) (R:relation (Graph A)) (x:Graph A) : EqG A R -> R (Overlay x Empty) x.
+Proof.
+  intros E.
+  rewrite (symmetry (pre_idempotence_Plus A R (Overlay x Empty) E)).
+  rewrite EqG_PlusAssoc.
+  rewrite EqG_PlusAssoc.
+  rewrite (symmetry (EqG_PlusAssoc x Empty x)).
+  rewrite (EqG_PlusCommut Empty x).
+  rewrite EqG_PlusAssoc.
+  rewrite (symmetry (EqG_PlusAssoc (Overlay x x) Empty Empty)).
+  rewrite (symmetry (EqG_PlusAssoc (Overlay x x) (Overlay Empty Empty) Empty)).
+  rewrite (EqG_PlusCommut (Overlay Empty Empty) Empty).
+  rewrite (pre_idempotence_Plus A R Empty E).
+  rewrite EqG_PlusCommut.
+  rewrite EqG_PlusAssoc.
+  rewrite (EqG_PlusCommut Empty x).
+  rewrite EqG_PlusCommut.
+  rewrite (pre_idempotence_Plus A R x E).
+  reflexivity.
 Qed.
