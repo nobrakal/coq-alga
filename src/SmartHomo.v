@@ -242,6 +242,14 @@ Proof.
     auto.
 Qed.
 
+Lemma smart_hom_isE A B (f : Graph A -> Graph B) (x : Graph A) :
+  Smart_hom f -> isEmpty x = true -> isEmpty (f x) = true.
+Proof.
+  intros S i.
+  rewrite (smart_hom_e A B f x S i).
+  auto.
+Qed.
+
 Lemma isEmpty_kSimpl A c (x y : Graph A) :
    c = Overlay \/ c = Connect -> isEmpty (kSimpl c x y) = true -> isEmpty x = true /\ isEmpty y = true.
 Proof.
@@ -339,12 +347,8 @@ Proof.
     destruct (bool_dec (isEmpty (f1 g1)) true) ; destruct (bool_dec (isEmpty (f1 g2)) true).
  -- rewrite e. rewrite (smart_hom_e B C f2 (f1 g1) H2 e). simpl.
     rewrite e0.
-    destruct (bool_dec (isEmpty (f2 (f1 g2))) true).
-  + rewrite e1.
-    rewrite (smart_hom_empty B C f2 H2). auto.
-  + rewrite (not_true_is_false (isEmpty (f2 (f1 g2))) n).
-    rewrite (smart_hom_e B C f2 (f1 g2) H2 e0).
-    rewrite (smart_hom_empty B C f2 H2). auto.
+    rewrite (smart_hom_isE B C f2 (f1 g2) H2 e0).
+    rewrite (smart_hom_empty B C f2 H2). reflexivity.
  -- rewrite e. rewrite (not_true_is_false (isEmpty (f1 g2)) n).
     rewrite (smart_hom_e B C f2 (f1 g1) H2 e). simpl.
     destruct (bool_dec (isEmpty (f2 (f1 g2))) true).
@@ -378,12 +382,8 @@ Proof.
     destruct (bool_dec (isEmpty (f1 g1)) true) ; destruct (bool_dec (isEmpty (f1 g2)) true).
  -- rewrite e. rewrite (smart_hom_e B C f2 (f1 g1) H2 e). simpl.
     rewrite e0.
-    destruct (bool_dec (isEmpty (f2 (f1 g2))) true).
-  + rewrite e1.
-    rewrite (smart_hom_empty B C f2 H2). auto.
-  + rewrite (not_true_is_false (isEmpty (f2 (f1 g2))) n).
-    rewrite (smart_hom_e B C f2 (f1 g2) H2 e0).
-    rewrite (smart_hom_empty B C f2 H2). auto.
+    rewrite (smart_hom_isE B C f2 (f1 g2) H2 e0).
+    rewrite (smart_hom_empty B C f2 H2). reflexivity.
  -- rewrite e. rewrite (not_true_is_false (isEmpty (f1 g2)) n).
     rewrite (smart_hom_e B C f2 (f1 g1) H2 e). simpl.
     destruct (bool_dec (isEmpty (f2 (f1 g2))) true).
