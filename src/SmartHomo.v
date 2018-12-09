@@ -411,3 +411,78 @@ Proof.
     rewrite (not_true_is_false (isEmpty (f1 g2)) n0).
     rewrite (smart_hom_connect B C f2 (f1 g1) (f1 g2) H2). auto.
 Qed.
+
+Lemma dropEmpty_idempotence A (x:Graph A) : dropEmpty (dropEmpty x) = dropEmpty x.
+Proof.
+  induction x.
+  - auto.
+  - auto.
+  - unfold dropEmpty.
+    rewrite foldg_overlay.
+    fold (dropEmpty x1).
+    fold (dropEmpty x2).
+    unfold kSimpl at 3 4.
+    destruct (bool_dec (isEmpty (dropEmpty x1)) true) ; destruct (bool_dec (isEmpty (dropEmpty x2)) true).
+ -- rewrite e. rewrite e0. auto.
+ -- rewrite e. rewrite (not_true_is_false (isEmpty (dropEmpty x2)) n). auto.
+ -- rewrite e. rewrite (not_true_is_false (isEmpty (dropEmpty x1)) n). auto.
+ -- rewrite (not_true_is_false (isEmpty (dropEmpty x1)) n).
+    rewrite (not_true_is_false (isEmpty (dropEmpty x2)) n0).
+    rewrite foldg_overlay.
+    fold (dropEmpty (dropEmpty x1)).
+    fold (dropEmpty (dropEmpty x2)).
+    rewrite IHx1.
+    rewrite IHx2.
+    unfold kSimpl.
+    rewrite (not_true_is_false (isEmpty (dropEmpty x1)) n).
+    rewrite (not_true_is_false (isEmpty (dropEmpty x2)) n0).
+    reflexivity.
+  - unfold dropEmpty.
+    rewrite foldg_connect.
+    fold (dropEmpty x1).
+    fold (dropEmpty x2).
+    unfold kSimpl at 3 4.
+    destruct (bool_dec (isEmpty (dropEmpty x1)) true) ; destruct (bool_dec (isEmpty (dropEmpty x2)) true).
+ -- rewrite e. rewrite e0. auto.
+ -- rewrite e. rewrite (not_true_is_false (isEmpty (dropEmpty x2)) n). auto.
+ -- rewrite e. rewrite (not_true_is_false (isEmpty (dropEmpty x1)) n). auto.
+ -- rewrite (not_true_is_false (isEmpty (dropEmpty x1)) n).
+    rewrite (not_true_is_false (isEmpty (dropEmpty x2)) n0).
+    rewrite foldg_connect.
+    fold (dropEmpty (dropEmpty x1)).
+    fold (dropEmpty (dropEmpty x2)).
+    rewrite IHx1.
+    rewrite IHx2.
+    unfold kSimpl.
+    rewrite (not_true_is_false (isEmpty (dropEmpty x1)) n).
+    rewrite (not_true_is_false (isEmpty (dropEmpty x2)) n0).
+    reflexivity.
+Qed.
+
+(* And the composition of two smart homomorphisms is a smart homomorphism *)
+Theorem smart_hom_compo_is_smart A B C (s1 : Graph A -> Graph B) (s2 : Graph B -> Graph C):
+ (Smart_hom s1) /\ (Smart_hom s2) -> Smart_hom (s2 ∘ s1).
+Proof.
+  intros H.
+  rewrite (smart_hom_compo A B C s1 s2 H).
+  destruct H as (H1,H2).
+  unfold Smart_hom.
+  apply FunctionalExtensionality.functional_extensionality.
+  intro g.
+  unfold compose.
+  induction g.
+  - auto.
+  - unfold bind. unfold foldg.
+    rewrite H2.
+    unfold compose.
+    rewrite (dropEmpty_idempotence C (bind (fun x : B => s2 (Vertex x)) (s1 (Vertex a)))).
+    reflexivity.
+  - rewrite foldg_overlay.
+    rewrite IHg1.
+    rewrite IHg2.
+    auto.
+  - rewrite foldg_connect.
+    rewrite IHg1.
+    rewrite IHg2.
+    auto.
+Qed.
