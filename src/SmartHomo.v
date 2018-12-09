@@ -3,13 +3,14 @@ Require Import Coq.Program.Basics.
 
 Require Import Coq.Bool.Bool.
 
-Require Import Relation_Definitions.
+Require Import Coq.Relations.Relation_Definitions.
 
 Require Import Graph.
 Require Import ReducedHomo.
 
 Open Scope program_scope.
 
+(* Remove the empty leaves around an operator *)
 Definition kSimpl {A: Type} (c : Graph A -> Graph A -> Graph A) (x y:Graph A) :=
   if isEmpty x
   then if isEmpty y

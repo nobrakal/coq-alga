@@ -1,8 +1,7 @@
 Require Import Coq.Program.Basics.
 
-Require Import Setoid.
+Require Import Coq.Setoids.Setoid.
 
-Require Import Relation_Definitions.
 Require Import Coq.Classes.RelationClasses.
 Require Import Coq.Relations.Relation_Definitions.
 
@@ -71,8 +70,6 @@ Class EqG (A:Type) (R : relation (Graph A)) : Prop := {
   EqG_decomposition : forall x y z,
     R (Connect x (Connect y z)) (Overlay (Connect x y) (Overlay (Connect x z) (Connect y z)))
  }.
-
-Require Import Coq.Setoids.Setoid.
 
 Lemma EqG_PlusRightCong (A:Type) (R: relation (Graph A)) : EqG A R ->
   forall x y z, R x y -> R (Overlay z x) (Overlay z y).
