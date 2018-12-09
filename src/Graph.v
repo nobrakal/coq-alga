@@ -95,39 +95,28 @@ Admitted.
 (* For Rewrite *)
 Require Import Setoid.
 Require Import Relation_Definitions.
+Require Import Coq.Classes.RelationClasses.
 
-Add Parametric Morphism A (R: relation (Graph A)) (g:Graph A) `(EqG A R) : (Overlay g)
-  with signature (R) ==> R
-    as overlay_right_morph.
+Add Parametric Morphism A (R: relation (Graph A)) `(EqG A R) : Overlay
+  with signature R ==> R ==> R
+    as overlay_morph.
 Proof.
-  intros x y r.
-  apply (EqG_PlusRightCong A R H).
+  intros x y r x' y' r'.
+  apply (EqG_PlusRightCong A R H x' y' x) in r'.
+  apply (EqG_PlusLeftCong x y y') in r.
+  transitivity (Overlay x y').
+  exact r'.
   exact r.
 Qed.
 
-Add Parametric Morphism A (R: relation (Graph A)) (g:Graph A) `(EqG A R) : (fun x => Overlay x g)
-  with signature (R) ==> R
-    as overlay_left_morph.
+Add Parametric Morphism A (R: relation (Graph A)) `(EqG A R) : Connect
+  with signature R ==> R ==> R
+    as connect_morph.
 Proof.
-  intros x y r.
-  apply (EqG_PlusLeftCong x y g).
-  exact r.
-Qed.
-
-Add Parametric Morphism A (R: relation (Graph A)) (g:Graph A) `(EqG A R) : (Connect g)
-  with signature (R) ==> R
-    as connect_right_morph.
-Proof.
-  intros x y r.
-  apply (EqG_TimesRightCong x y g).
-  exact r.
-Qed.
-
-Add Parametric Morphism A (R: relation (Graph A)) (g:Graph A) `(EqG A R) : (fun x => Connect x g)
-  with signature (R) ==> R
-    as connect_left_morph.
-Proof.
-  intros x y r.
-  apply (EqG_TimesLeftCong x y g).
+  intros x y r x' y' r'.
+  apply (EqG_TimesRightCong x' y' x) in r'.
+  apply (EqG_TimesLeftCong x y y') in r.
+  transitivity (Connect x y').
+  exact r'.
   exact r.
 Qed.

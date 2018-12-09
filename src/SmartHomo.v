@@ -179,8 +179,8 @@ Proof.
       apply (is_empty_R B R (f a) H). exact e.
       apply (is_empty_R B R (f b) H). exact e0.
    -- rewrite e. rewrite (not_true_is_false (isEmpty (f b)) n).
-      rewrite EqG_PlusCommut.
       rewrite (is_empty_R B R (f a) H e).
+      rewrite EqG_PlusCommut.
       rewrite (id_Plus B R (f b) H).
       reflexivity.
    -- rewrite (not_true_is_false (isEmpty (f a)) n). rewrite e.
@@ -200,11 +200,8 @@ Proof.
       apply (is_empty_R B R (f a) H). exact e.
       apply (is_empty_R B R (f b) H). exact e0.
    -- rewrite e. rewrite (not_true_is_false (isEmpty (f b)) n).
-      pose (ne := is_empty_R B R (f a) H e).
-      pose (ok := (EqG_TimesLeftCong (f a) Empty (f b)) ne). (*TODO use rewrite *)
-      transitivity (Connect Empty (f b)).
+      rewrite (is_empty_R B R (f a) H e).
       rewrite EqG_TimesLeftId. reflexivity.
-      rewrite ok. rewrite EqG_TimesLeftId. reflexivity.
    -- rewrite (not_true_is_false (isEmpty (f a)) n). rewrite e.
       rewrite (is_empty_R B R (f b) H e).
       rewrite EqG_TimesRightId.
