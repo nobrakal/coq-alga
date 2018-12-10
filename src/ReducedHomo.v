@@ -2,7 +2,6 @@ Require Coq.Logic.FunctionalExtensionality.
 
 Require Import Coq.Relations.Relation_Definitions.
 Require Import Coq.Classes.RelationClasses.
-Require Import Omega.
 
 Require Import Graph.
 Require Import Homomorphism.
@@ -79,8 +78,8 @@ Theorem const_empty_is_not_hom (A B : Type) : not (Homomorphism (A:=A) (B:=B) co
 Proof.
   unfold not.
   intros H.
-  pose (H' := hom_leq_size A B const_empty H (Overlay Empty Empty)).
-  rewrite sizeov in H'.
-  rewrite size1 in H'.
-  omega.
+  destruct H.
+  pose (H' := Hom_Overlay Empty Empty).
+  compute in H'.
+  discriminate H'.
 Qed.
