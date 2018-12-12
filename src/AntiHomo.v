@@ -13,8 +13,6 @@ Class AntiHom {A B:Type} (f : Graph A -> Graph B) : Prop := {
   Anti_Connect :> forall a b, f (Connect a b) = Connect (f b) (f a)
  }.
 
-Definition antibind {A B:Type} (f:A -> Graph B) (g:Graph A) := foldg Empty f Overlay (flip Connect) g.
-
 Lemma inline_antibind : forall A B (f_v : A -> Graph B),
   antibind f_v = foldg Empty f_v Overlay (flip Connect).
 Proof. auto. Qed.

@@ -25,10 +25,13 @@ Fixpoint foldg {A B : Type} (e:B) (v:A -> B) (o:B -> B -> B) (c:B -> B -> B) (g:
   end.
 
 Definition bind {A B:Type} (f:A -> Graph B) (g:Graph A) := foldg Empty f Overlay Connect g.
+Definition antibind {A B:Type} (f:A -> Graph B) (g:Graph A) := foldg Empty f Overlay (flip Connect) g.
 
 Definition size {A:Type} (g : Graph A) := foldg 1 (fun _ => 1) (fun x y => x+y) (fun x y => x+y) g.
 
 Definition isEmpty {A:Type}  (g : Graph A) := foldg true (fun _ => false) andb andb g.
+
+Definition transpose {A:Type} (x: Graph A) := antibind Vertex x.
 
 Lemma inline_bind : forall A B (f_v : A -> Graph B),
   bind f_v = foldg Empty f_v Overlay Connect.
