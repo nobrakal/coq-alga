@@ -23,6 +23,12 @@ Proof.
   repeat split.
 Qed.
 
+Lemma transpose_is_anti (A:Type) : AntiHom (A:=A) transpose.
+Proof.
+  unfold transpose.
+  apply antibind_is_anti.
+Qed.
+
 Lemma anti_is_antibind A B (hom: Graph A -> Graph B):
   AntiHom hom -> hom = antibind (hom ∘ Vertex).
 Proof.
