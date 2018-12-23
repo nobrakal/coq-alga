@@ -6,6 +6,7 @@ Require Import Coq.Bool.Bool.
 Require Import Coq.Relations.Relation_Definitions.
 
 Require Import Graph.
+Require Import TimesLeftId.
 Require Import ReducedHomo.
 
 Open Scope program_scope.
@@ -202,7 +203,7 @@ Proof.
       apply (is_empty_R B R (f b) H). exact e0.
    -- rewrite e. rewrite (not_true_is_false (isEmpty (f b)) n).
       rewrite (is_empty_R B R (f a) H e).
-      rewrite EqG_TimesLeftId. reflexivity.
+      rewrite (timesLeftId B R H (f b)). reflexivity.
    -- rewrite (not_true_is_false (isEmpty (f a)) n). rewrite e.
       rewrite (is_empty_R B R (f b) H e).
       rewrite EqG_TimesRightId.

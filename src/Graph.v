@@ -65,7 +65,6 @@ Class EqG (A:Type) (R : relation (Graph A)) : Prop := {
   EqG_PlusAssoc :> forall x y z, R (Overlay x (Overlay y z)) (Overlay (Overlay x y) z);
 
   (* Connect *)
-  EqG_TimesLeftId  :> forall x, R (Connect Empty x) x ;
   EqG_TimesRightId :> forall x, R (Connect x Empty) x ;
   EqG_TimesAssoc :> forall x y z, R (Connect x (Connect y z)) (Connect (Connect x y) z);
 
