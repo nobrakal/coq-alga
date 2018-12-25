@@ -1,7 +1,7 @@
 -R src/ Alga
 src/Graph.v
+src/Incl.v
 src/Homomorphism.v
 src/AntiHomo.v
-src/TimesLeftId.v
 src/ReducedHomo.v
 src/SmartHomo.v

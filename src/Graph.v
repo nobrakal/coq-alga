@@ -45,12 +45,6 @@ Lemma foldg_connect : forall A B (e:B) (v:A -> B) (o:B -> B -> B) (c:B -> B -> B
   foldg e v o c (Connect a b) = c (foldg e v o c a) (foldg e v o c b).
 Proof. auto. Qed.
 
-(*
-    -- Other axioms
-    left-distributivity  : ∀ {x y z : Graph A} -> x * (y + z) ≡ x * y + x * z
-    right-distributivity : ∀ {x y z : Graph A} -> (x + y) * z ≡ x * z + y * z
-*)
-
 Class EqG (A:Type) (R : relation (Graph A)) : Prop := {
   EqG_Equiv :> Equivalence R;
 
@@ -66,9 +60,14 @@ Class EqG (A:Type) (R : relation (Graph A)) : Prop := {
 
   (* Connect *)
   EqG_TimesRightId :> forall x, R (Connect x Empty) x ;
+  EqG_TimesLeftId :> forall x, R (Connect Empty x) x ;
   EqG_TimesAssoc :> forall x y z, R (Connect x (Connect y z)) (Connect (Connect x y) z);
 
   (* Others axioms *)
+  EqG_LeftDistributivity : forall x y z,
+    R (Connect x (Overlay y z)) (Overlay (Connect x y) (Connect x z));
+  EqG_RightDistributivity : forall x y z,
+    R (Connect (Overlay x y) z) (Overlay (Connect x z) (Connect y z));
   EqG_decomposition : forall x y z,
     R (Connect x (Connect y z)) (Overlay (Connect x y) (Overlay (Connect x z) (Connect y z)))
  }.
@@ -145,5 +144,35 @@ Proof.
   rewrite (EqG_PlusCommut Empty x).
   rewrite EqG_PlusCommut.
   rewrite (pre_idempotence_Plus A R x E).
+  reflexivity.
+Qed.
+
+Lemma containmentLeft A R (x y : Graph A) : EqG A R -> R (Connect x y) (Overlay (Connect x y) x).
+Proof.
+  intros H.
+  rewrite (symmetry (EqG_TimesRightId x)) at 3.
+  rewrite (symmetry (EqG_LeftDistributivity x y Empty)).
+  rewrite (id_Plus A R y H).
+  reflexivity.
+Qed.
+
+Lemma containmentRight A R (x y : Graph A) : EqG A R -> R (Connect x y) (Overlay (Connect x y) y).
+Proof.
+  intros H.
+  rewrite (symmetry (EqG_TimesRightId (Connect x y))) at 1.
+  rewrite (symmetry (EqG_TimesAssoc x y Empty)).
+  rewrite EqG_decomposition.
+  repeat rewrite EqG_TimesRightId.
+  rewrite EqG_PlusAssoc.
+  rewrite (symmetry (containmentLeft A R x y H)).
+  reflexivity.
+Qed.
+
+Lemma plus_Idempotence A R (x : Graph A) : EqG A R -> R (Overlay x x) x.
+Proof.
+  intros H.
+  rewrite (symmetry (id_Plus A R x H)) at 1.
+  rewrite EqG_PlusCommut.
+  rewrite (pre_idempotence_Plus A R x H).
   reflexivity.
 Qed.
