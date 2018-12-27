@@ -195,15 +195,15 @@ Proof.
     rewrite (smart_hom_connect A B f a b S).
     unfold kSimpl.
     destruct (bool_dec (isEmpty (f a)) true); destruct (bool_dec (isEmpty (f b)) true).
-   -- rewrite e. rewrite e0.
+   -- rewrite e; rewrite e0.
       symmetry.
       apply (r_co_empty B R (f a) (f b) H).
-      apply (is_empty_R B R (f a) H). exact e.
-      apply (is_empty_R B R (f b) H). exact e0.
-   -- rewrite e. rewrite (not_true_is_false (isEmpty (f b)) n).
+      apply (is_empty_R B R (f a) H); exact e.
+      apply (is_empty_R B R (f b) H); exact e0.
+   -- rewrite e; rewrite (not_true_is_false (isEmpty (f b)) n).
       rewrite (is_empty_R B R (f a) H e).
       rewrite EqG_TimesLeftId. reflexivity.
-   -- rewrite (not_true_is_false (isEmpty (f a)) n). rewrite e.
+   -- rewrite (not_true_is_false (isEmpty (f a)) n); rewrite e.
       rewrite (is_empty_R B R (f b) H e).
       rewrite EqG_TimesRightId.
       reflexivity.
@@ -321,7 +321,7 @@ Proof.
     auto.
 Qed.
 
-(* You can compose two smart homomorphism *)
+(* You can compose two smart homomorphisms *)
 Theorem smart_hom_compo A B C (s1 : Graph A -> Graph B) (s2 : Graph B -> Graph C):
  (Smart_hom s1) /\ (Smart_hom s2) ->
   s2 ∘ s1 = foldg Empty (s2 ∘ s1 ∘ Vertex) (kSimpl Overlay) (kSimpl Connect).
@@ -443,9 +443,9 @@ Proof.
     fold (dropEmpty x2).
     unfold kSimpl at 3 4.
     destruct (bool_dec (isEmpty (dropEmpty x1)) true) ; destruct (bool_dec (isEmpty (dropEmpty x2)) true).
- -- rewrite e. rewrite e0. auto.
- -- rewrite e. rewrite (not_true_is_false (isEmpty (dropEmpty x2)) n). auto.
- -- rewrite e. rewrite (not_true_is_false (isEmpty (dropEmpty x1)) n). auto.
+ -- rewrite e; rewrite e0; auto.
+ -- rewrite e; rewrite (not_true_is_false (isEmpty (dropEmpty x2)) n); auto.
+ -- rewrite e; rewrite (not_true_is_false (isEmpty (dropEmpty x1)) n); auto.
  -- rewrite (not_true_is_false (isEmpty (dropEmpty x1)) n).
     rewrite (not_true_is_false (isEmpty (dropEmpty x2)) n0).
     rewrite foldg_connect.
