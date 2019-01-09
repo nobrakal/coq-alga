@@ -88,30 +88,19 @@ Proof.
   intro x.
   induction x.
   - auto.
-  - unfold compose.
-    unfold bind.
-    unfold induce.
-    unfold foldg.
+  - unfold compose; unfold bind; unfold induce; unfold foldg.
     rewrite (f_inside_if (Graph A) (Graph A) dropEmpty (pred a)).
-    unfold dropEmpty.
-    unfold foldg. reflexivity.
-  - unfold induce.
-    unfold compose.
-    unfold dropEmpty.
+    unfold dropEmpty; unfold foldg.
+    reflexivity.
+  - unfold induce; unfold compose; unfold dropEmpty.
     rewrite foldg_overlay.
-    fold (induce pred x1).
-    rewrite IHx1.
-    fold (induce pred x2).
-    rewrite IHx2.
+    fold (induce pred x1); rewrite IHx1.
+    fold (induce pred x2); rewrite IHx2.
     auto.
-  - unfold induce.
-    unfold compose.
-    unfold dropEmpty.
+  - unfold induce; unfold compose; unfold dropEmpty.
     rewrite foldg_connect.
-    fold (induce pred x1).
-    rewrite IHx1.
-    fold (induce pred x2).
-    rewrite IHx2.
+    fold (induce pred x1); rewrite IHx1.
+    fold (induce pred x2); rewrite IHx2.
     auto.
 Qed.
 
@@ -142,7 +131,7 @@ Proof.
   - unfold isEmpty in i.
     rewrite foldg_overlay in i.
     rewrite andb_true_iff in i.
-    fold (isEmpty g1) in i. fold (isEmpty g2) in i.
+    fold (isEmpty g1) in i; fold (isEmpty g2) in i.
     destruct i.
     apply IHg1 in H.
     apply IHg2 in H0.
@@ -152,7 +141,7 @@ Proof.
   - unfold isEmpty in i.
     rewrite foldg_connect in i.
     rewrite andb_true_iff in i.
-    fold (isEmpty g1) in i. fold (isEmpty g2) in i.
+    fold (isEmpty g1) in i; fold (isEmpty g2) in i.
     destruct i.
     apply IHg1 in H.
     apply IHg2 in H0.
@@ -174,17 +163,17 @@ Proof.
     rewrite (smart_hom_overlay A B f a b S).
     unfold kSimpl.
     destruct (bool_dec (isEmpty (f a)) true); destruct (bool_dec (isEmpty (f b)) true).
-   -- rewrite e. rewrite e0.
+   -- rewrite e; rewrite e0.
       symmetry.
       apply (r_ov_empty B R (f a) (f b) H).
       apply (is_empty_R B R (f a) H). exact e.
       apply (is_empty_R B R (f b) H). exact e0.
-   -- rewrite e. rewrite (not_true_is_false (isEmpty (f b)) n).
+   -- rewrite e; rewrite (not_true_is_false (isEmpty (f b)) n).
       rewrite (is_empty_R B R (f a) H e).
       rewrite EqG_PlusCommut.
       rewrite (id_Plus B R (f b) H).
       reflexivity.
-   -- rewrite (not_true_is_false (isEmpty (f a)) n). rewrite e.
+   -- rewrite (not_true_is_false (isEmpty (f a)) n); rewrite e.
       rewrite (is_empty_R B R (f b) H e).
       rewrite (id_Plus B R (f a) H).
       reflexivity.
@@ -228,8 +217,8 @@ Proof.
     fold (isEmpty x2) in i.
     rewrite andb_true_iff in i.
     destruct i as (i1,i2).
-    apply IHx1 in i1. rewrite i1.
-    apply IHx2 in i2. rewrite i2.
+    apply IHx1 in i1; rewrite i1.
+    apply IHx2 in i2; rewrite i2.
     auto.
   - rewrite foldg_connect.
     unfold isEmpty in i.
@@ -238,8 +227,8 @@ Proof.
     fold (isEmpty x2) in i.
     rewrite andb_true_iff in i.
     destruct i as (i1,i2).
-    apply IHx1 in i1. rewrite i1.
-    apply IHx2 in i2. rewrite i2.
+    apply IHx1 in i1; rewrite i1.
+    apply IHx2 in i2; rewrite i2.
     auto.
 Qed.
 
