@@ -60,7 +60,7 @@ Class EqG (A:Type) (R : relation (Graph A)) : Prop := {
 
   (* Connect *)
   EqG_TimesRightId :> forall x, R (Connect x Empty) x ;
-  EqG_TimesLeftId :> forall x, R (Connect Empty x) x ;
+  EqG_TimesLeftIdVertex :> forall a, R (Connect Empty (Vertex a)) (Vertex a) ;
   EqG_TimesAssoc :> forall x y z, R (Connect x (Connect y z)) (Connect (Connect x y) z);
 
   (* Others axioms *)
@@ -175,4 +175,23 @@ Proof.
   rewrite EqG_PlusCommut.
   rewrite (pre_idempotence_Plus A R x H).
   reflexivity.
+Qed.
+
+Theorem timesLeftId A (R: relation (Graph A)) `(EqG A R): forall x, R (Connect Empty x) x.
+Proof.
+  intros x.
+  induction x.
+  - rewrite EqG_TimesRightId. reflexivity.
+  - exact (EqG_TimesLeftIdVertex a).
+  - rewrite EqG_LeftDistributivity.
+    rewrite IHx1; rewrite IHx2.
+    reflexivity.
+  - rewrite EqG_decomposition.
+    rewrite IHx1; rewrite IHx2.
+    rewrite (EqG_PlusCommut x2 (Connect x1 x2)).
+    rewrite EqG_PlusAssoc.
+    rewrite (EqG_PlusCommut x1 (Connect x1 x2)).
+    rewrite (symmetry (containmentLeft A R x1 x2 H)).
+    rewrite (symmetry (containmentRight A R x1 x2 H)).
+    reflexivity.
 Qed.
