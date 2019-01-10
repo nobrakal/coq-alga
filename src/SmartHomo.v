@@ -26,17 +26,17 @@ Definition induce {A:Type} (pred : A -> bool) (g:Graph A) :=
   foldg Empty (fun x => if pred x then Vertex x else Empty) (kSimpl Overlay) (kSimpl Connect) g.
 
 (* A smart homomorphism is a graph morphism where you have removed empty leaves *)
-Definition Smart_hom {A B:Type} (f : Graph A -> Graph B) : Prop :=
+Definition Smart_hom {A B} (f : Graph A -> Graph B) : Prop :=
   f = dropEmpty ∘ (bind (compose f Vertex)).
 
-Lemma smart_hom_empty (A B: Type) (f : Graph A -> Graph B) : Smart_hom f -> f Empty = Empty.
+Lemma smart_hom_empty {A B}  {f : Graph A -> Graph B}: Smart_hom f -> f Empty = Empty.
 Proof.
   intros H.
   rewrite H.
   reflexivity.
 Qed.
 
-Lemma smart_hom_overlay (A B: Type) (f : Graph A -> Graph B) (a b: Graph A) :
+Lemma smart_hom_overlay {A B} {f : Graph A -> Graph B} (a b: Graph A):
   Smart_hom f -> f (Overlay a b) = kSimpl Overlay (f a) (f b).
 Proof.
   intros H.
@@ -44,7 +44,7 @@ Proof.
   reflexivity.
 Qed.
 
-Lemma smart_hom_connect (A B: Type) (f : Graph A -> Graph B) (a b: Graph A) :
+Lemma smart_hom_connect {A B} {f : Graph A -> Graph B} (a b: Graph A) :
   Smart_hom f -> f (Connect a b) = kSimpl Connect (f a) (f b).
 Proof.
   intros H.
@@ -53,28 +53,28 @@ Proof.
 Qed.
 
 (* A smart homomorphism is a foldg-function *)
-Theorem smart_hom_single (A B:Type) (f : Graph A -> Graph B) :
+Theorem smart_hom_single {A B} {f : Graph A -> Graph B} :
   Smart_hom f -> f = foldg Empty (fun v => f (Vertex v)) (kSimpl Overlay) (kSimpl Connect).
 Proof.
   intros S.
   apply FunctionalExtensionality.functional_extensionality.
   intros g.
   induction g.
-  - rewrite (smart_hom_empty A B f S). compute. reflexivity.
+  - rewrite (smart_hom_empty S). auto.
   - reflexivity.
   - rewrite foldg_overlay.
     rewrite (eq_sym IHg1).
     rewrite (eq_sym IHg2).
-    rewrite (smart_hom_overlay A B f g1 g2 S).
+    rewrite (smart_hom_overlay g1 g2 S).
     reflexivity.
   - rewrite foldg_connect.
     rewrite (eq_sym IHg1).
     rewrite (eq_sym IHg2).
-    rewrite (smart_hom_connect A B f g1 g2 S).
+    rewrite (smart_hom_connect g1 g2 S).
     reflexivity.
 Qed.
 
-Lemma f_inside_if A B (f : A -> B) (x:bool) (a1 a2:A) : f (if x then a1 else a2) = if x then f a1 else f a2.
+Lemma f_inside_if {A B} (f : A -> B) (x:bool) (a1 a2:A) : f (if x then a1 else a2) = if x then f a1 else f a2.
 Proof.
   induction x.
   - auto.
@@ -89,7 +89,7 @@ Proof.
   induction x.
   - auto.
   - unfold compose; unfold bind; unfold induce; unfold foldg.
-    rewrite (f_inside_if (Graph A) (Graph A) dropEmpty (pred a)).
+    rewrite (f_inside_if dropEmpty (pred a)).
     unfold dropEmpty; unfold foldg.
     reflexivity.
   - unfold induce; unfold compose; unfold dropEmpty.
@@ -104,19 +104,19 @@ Proof.
     auto.
 Qed.
 
-Lemma r_ov_empty A (R: relation (Graph A)) (a b: Graph A) :
-  EqG A R -> R a Empty -> R b Empty -> R (Overlay a b) Empty.
+Lemma r_ov_empty {A} {R: relation (Graph A)} {a b: Graph A} `{EqG A R} :
+   R a Empty -> R b Empty -> R (Overlay a b) Empty.
 Proof.
-  intros E ra rb.
+  intros ra rb.
   rewrite rb.
   rewrite (id_Plus a).
   exact ra.
 Qed.
 
-Lemma r_co_empty A (R: relation (Graph A)) (a b: Graph A) :
-  EqG A R -> R a Empty -> R b Empty -> R (Connect a b) Empty.
+Lemma r_co_empty {A} {R: relation (Graph A)} {a b: Graph A} `{EqG A R} :
+  R a Empty -> R b Empty -> R (Connect a b) Empty.
 Proof.
-  intros E ra rb.
+  intros ra rb.
   rewrite rb.
   rewrite EqG_TimesRightId.
   exact ra.
@@ -157,15 +157,15 @@ Proof.
   intros H S.
   split.
   - exact H.
-  - rewrite (smart_hom_empty A B f S).
+  - rewrite (smart_hom_empty S).
     reflexivity.
   - intros a b.
-    rewrite (smart_hom_overlay A B f a b S).
+    rewrite (smart_hom_overlay a b S).
     unfold kSimpl.
     destruct (bool_dec (isEmpty (f a)) true); destruct (bool_dec (isEmpty (f b)) true).
    -- rewrite e; rewrite e0.
       symmetry.
-      apply (r_ov_empty B R (f a) (f b) H).
+      apply r_ov_empty.
       apply (is_empty_R B R (f a) H). exact e.
       apply (is_empty_R B R (f b) H). exact e0.
    -- rewrite e; rewrite (not_true_is_false (isEmpty (f b)) n).
@@ -181,12 +181,12 @@ Proof.
       rewrite (not_true_is_false (isEmpty (f b)) n0).
       reflexivity.
   - intros a b.
-    rewrite (smart_hom_connect A B f a b S).
+    rewrite (smart_hom_connect a b S).
     unfold kSimpl.
     destruct (bool_dec (isEmpty (f a)) true); destruct (bool_dec (isEmpty (f b)) true).
    -- rewrite e; rewrite e0.
       symmetry.
-      apply (r_co_empty B R (f a) (f b) H).
+      apply r_co_empty.
       apply (is_empty_R B R (f a) H); exact e.
       apply (is_empty_R B R (f b) H); exact e0.
    -- rewrite e; rewrite (not_true_is_false (isEmpty (f b)) n).
@@ -205,7 +205,7 @@ Lemma smart_hom_e A B (f : Graph A -> Graph B) (x : Graph A) :
   Smart_hom f -> isEmpty x = true -> f x = Empty.
 Proof.
   intros S i.
-  rewrite (smart_hom_single A B f S).
+  rewrite (smart_hom_single S).
   induction x.
   - auto.
   - compute in i.
@@ -317,11 +317,11 @@ Theorem smart_hom_compo A B C (s1 : Graph A -> Graph B) (s2 : Graph B -> Graph C
 Proof.
   intros H.
   destruct H as (H1,H2).
-  rewrite (smart_hom_single A B s1 H1).
-  rewrite (smart_hom_single A B s1 H1) in H1.
+  rewrite (smart_hom_single H1).
+  rewrite (smart_hom_single H1) in H1.
   remember (foldg Empty (fun v : A => s1 (Vertex v)) (kSimpl Overlay) (kSimpl Connect)) as f1.
-  rewrite (smart_hom_single B C s2 H2).
-  rewrite (smart_hom_single B C s2 H2) in H2.
+  rewrite (smart_hom_single H2).
+  rewrite (smart_hom_single H2) in H2.
   remember (foldg Empty (fun v : B => s2 (Vertex v)) (kSimpl Overlay) (kSimpl Connect)) as f2.
   apply FunctionalExtensionality.functional_extensionality.
   intros g.
@@ -338,7 +338,7 @@ Proof.
  -- rewrite e. rewrite (smart_hom_e B C f2 (f1 g1) H2 e). simpl.
     rewrite e0.
     rewrite (smart_hom_isE B C f2 (f1 g2) H2 e0).
-    rewrite (smart_hom_empty B C f2 H2). reflexivity.
+    rewrite (smart_hom_empty H2). reflexivity.
  -- rewrite e. rewrite (not_true_is_false (isEmpty (f1 g2)) n).
     rewrite (smart_hom_e B C f2 (f1 g1) H2 e). simpl.
     destruct (bool_dec (isEmpty (f2 (f1 g2))) true).
@@ -363,7 +363,7 @@ Proof.
   + rewrite (not_true_is_false (isEmpty (f2 (f1 g1))) n0). reflexivity.
  -- rewrite (not_true_is_false (isEmpty (f1 g1)) n).
     rewrite (not_true_is_false (isEmpty (f1 g2)) n0).
-    rewrite (smart_hom_overlay B C f2 (f1 g1) (f1 g2) H2). auto.
+    rewrite (smart_hom_overlay (f1 g1) (f1 g2) H2). auto.
   - rewrite Heqf1.
     repeat rewrite foldg_connect.
     rewrite (eq_sym Heqf1).
@@ -373,7 +373,7 @@ Proof.
  -- rewrite e. rewrite (smart_hom_e B C f2 (f1 g1) H2 e). simpl.
     rewrite e0.
     rewrite (smart_hom_isE B C f2 (f1 g2) H2 e0).
-    rewrite (smart_hom_empty B C f2 H2). reflexivity.
+    rewrite (smart_hom_empty H2). reflexivity.
  -- rewrite e. rewrite (not_true_is_false (isEmpty (f1 g2)) n).
     rewrite (smart_hom_e B C f2 (f1 g1) H2 e). simpl.
     destruct (bool_dec (isEmpty (f2 (f1 g2))) true).
@@ -398,7 +398,7 @@ Proof.
   + rewrite (not_true_is_false (isEmpty (f2 (f1 g1))) n0). reflexivity.
  -- rewrite (not_true_is_false (isEmpty (f1 g1)) n).
     rewrite (not_true_is_false (isEmpty (f1 g2)) n0).
-    rewrite (smart_hom_connect B C f2 (f1 g1) (f1 g2) H2). auto.
+    rewrite (smart_hom_connect (f1 g1) (f1 g2) H2). auto.
 Qed.
 
 Lemma dropEmpty_idempotence A (x:Graph A) : dropEmpty (dropEmpty x) = dropEmpty x.

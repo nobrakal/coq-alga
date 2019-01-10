@@ -15,12 +15,12 @@ Class Reduced_hom {A B : Type} (R: relation (Graph B)) (f : Graph A -> Graph B) 
  }.
 
 (* A graph homomorphism is a reduced homorphism *)
-Theorem hom_is_reduced_hom (A B:Type) (R: relation (Graph B)) (f : Graph A -> Graph B) :
-  EqG B R -> Homomorphism f -> Reduced_hom R f.
+Theorem hom_is_reduced_hom {A B} {R: relation (Graph B)} {f : Graph A -> Graph B} `{EqG B R}:
+  Homomorphism f -> Reduced_hom R f.
 Proof.
-  intros E H.
+  intros E.
   split.
-  - exact E.
+  - exact H.
   - rewrite Hom_Empty.
     reflexivity.
   - intros a b.
@@ -40,7 +40,7 @@ Definition const_empty {A B:Type} (g:Graph A) : Graph B :=
   | Connect _ _ => Empty
   end.
 
-Lemma const_empty_is_empty (A B: Type) (g:Graph A) : const_empty (A:=A) (B:=B) g = Empty.
+Lemma const_empty_is_empty {A B} (g:Graph A) : const_empty (A:=A) (B:=B) g = Empty.
 Proof.
   induction g.
   - auto.
@@ -49,12 +49,11 @@ Proof.
   - auto.
 Qed.
 
-Theorem const_empty_is_reduced_hom (A B : Type) (R: relation (Graph B)) :
-  EqG B R -> Reduced_hom (A:=A) R const_empty.
+Theorem const_empty_is_reduced_hom {A B} {R: relation (Graph B)} `{EqG B R}:
+  Reduced_hom (A:=A) R const_empty.
 Proof.
-  intro E.
   split.
-  - exact E.
+  - exact H.
   - compute. reflexivity.
   - intros a b.
     repeat rewrite const_empty_is_empty.
@@ -62,19 +61,12 @@ Proof.
     apply (id_Plus Empty).
   - intros a b.
     repeat rewrite const_empty_is_empty.
-    destruct E.
     apply symmetry.
     apply EqG_TimesRightId.
 Qed.
 
-Lemma sizeov (A:Type) : size (A:=A) (Overlay Empty Empty) = 2.
-Proof. auto. Qed.
-
-Lemma size1 (A B:Type) : size (A:=B) (const_empty (A:=A) (Overlay Empty Empty)) = 1.
-Proof. auto. Qed.
-
 (* It exists a reduced graph morphisms that is not a graph homomorphism *)
-Theorem const_empty_is_not_hom (A B : Type) : not (Homomorphism (A:=A) (B:=B) const_empty).
+Theorem const_empty_is_not_hom {A B} : not (Homomorphism (A:=A) (B:=B) const_empty).
 Proof.
   unfold not.
   intros H.
