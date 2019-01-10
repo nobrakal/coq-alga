@@ -109,7 +109,7 @@ Lemma r_ov_empty A (R: relation (Graph A)) (a b: Graph A) :
 Proof.
   intros E ra rb.
   rewrite rb.
-  rewrite (id_Plus A R a E).
+  rewrite (id_Plus a).
   exact ra.
 Qed.
 
@@ -136,7 +136,7 @@ Proof.
     apply IHg1 in H.
     apply IHg2 in H0.
     rewrite H0.
-    rewrite (id_Plus A R g1 E).
+    rewrite (id_Plus g1).
     exact H.
   - unfold isEmpty in i.
     rewrite foldg_connect in i.
@@ -171,11 +171,11 @@ Proof.
    -- rewrite e; rewrite (not_true_is_false (isEmpty (f b)) n).
       rewrite (is_empty_R B R (f a) H e).
       rewrite EqG_PlusCommut.
-      rewrite (id_Plus B R (f b) H).
+      rewrite (id_Plus (f b)).
       reflexivity.
    -- rewrite (not_true_is_false (isEmpty (f a)) n); rewrite e.
       rewrite (is_empty_R B R (f b) H e).
-      rewrite (id_Plus B R (f a) H).
+      rewrite (id_Plus (f a)).
       reflexivity.
    -- rewrite (not_true_is_false (isEmpty (f a)) n).
       rewrite (not_true_is_false (isEmpty (f b)) n0).
@@ -191,7 +191,7 @@ Proof.
       apply (is_empty_R B R (f b) H); exact e0.
    -- rewrite e; rewrite (not_true_is_false (isEmpty (f b)) n).
       rewrite (is_empty_R B R (f a) H e).
-      rewrite (timesLeftId B R H). reflexivity.
+      rewrite (timesLeftId (f b)). reflexivity.
    -- rewrite (not_true_is_false (isEmpty (f a)) n); rewrite e.
       rewrite (is_empty_R B R (f b) H e).
       rewrite EqG_TimesRightId.

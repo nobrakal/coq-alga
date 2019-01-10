@@ -59,7 +59,7 @@ Proof.
   - intros a b.
     repeat rewrite const_empty_is_empty.
     apply symmetry.
-    apply (id_Plus B R Empty E).
+    apply (id_Plus Empty).
   - intros a b.
     repeat rewrite const_empty_is_empty.
     destruct E.

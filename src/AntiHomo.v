@@ -103,7 +103,7 @@ Theorem anti_compo_homo_left A B C (f : Graph A -> Graph B) (g : Graph B -> Grap
   Homomorphism f /\ AntiHom g -> AntiHom (g ∘ f).
 Proof.
   intros H. destruct H as (H1,H2).
-  rewrite (hom_is_bind A B f H1).
+  rewrite (hom_is_bind H1).
   rewrite (anti_is_antibind B C g H2).
   rewrite (inline_antibind B C).
   rewrite foldg_bind.
@@ -115,7 +115,7 @@ Theorem anti_compo_homo_right A B C (f : Graph A -> Graph B) (g : Graph B -> Gra
 Proof.
   intros H. destruct H as (H1,H2).
   rewrite (anti_is_antibind A B f H1).
-  rewrite (hom_is_bind B C g H2).
+  rewrite (hom_is_bind H2).
   rewrite (inline_bind B C).
   rewrite foldg_antibind.
   apply antibind_is_anti.

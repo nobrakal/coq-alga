@@ -27,7 +27,7 @@ Proof.
   rewrite (symmetry r).
   rewrite EqG_PlusAssoc.
   rewrite ((EqG_PlusAssoc x x y)).
-  rewrite (plus_Idempotence A R x H).
+  rewrite (plus_Idempotence x).
   reflexivity.
 Qed.
 
@@ -37,8 +37,8 @@ Proof.
   unfold incl.
   rewrite EqG_PlusCommut.
   rewrite EqG_PlusAssoc.
-  rewrite (symmetry (containmentLeft A R x y H)).
-  rewrite (symmetry (containmentRight A R x y H)).
+  rewrite (symmetry (containmentLeft x y)).
+  rewrite (symmetry (containmentRight x y)).
   reflexivity.
 Qed.
 
@@ -52,7 +52,7 @@ Proof.
   rewrite EqG_PlusCommut.
   rewrite (EqG_PlusCommut z (Overlay x z)).
   rewrite (symmetry (EqG_PlusAssoc x z z)).
-  rewrite (plus_Idempotence A R z H).
+  rewrite (plus_Idempotence z).
   unfold incl in r.
   rewrite EqG_PlusAssoc.
   rewrite (EqG_PlusCommut y x).
@@ -67,7 +67,7 @@ Proof.
   rewrite EqG_PlusAssoc.
   rewrite (EqG_PlusCommut (Overlay z x) z).
   rewrite (EqG_PlusAssoc z z x).
-  rewrite (plus_Idempotence A R z H).
+  rewrite (plus_Idempotence z).
   unfold incl in r.
   rewrite (symmetry (EqG_PlusAssoc z x y)).
   rewrite r.
@@ -123,7 +123,7 @@ Proof.
   intro x.
   unfold incl.
   rewrite EqG_PlusCommut.
-  rewrite (id_Plus A R x H).
+  rewrite (id_Plus x).
   reflexivity.
 Qed.
 
@@ -135,7 +135,7 @@ Proof.
   rewrite (symmetry r).
   rewrite EqG_PlusAssoc.
   rewrite (EqG_PlusAssoc x x y).
-  rewrite (plus_Idempotence A R x H).
+  rewrite (plus_Idempotence x).
   reflexivity.
 Qed.
 
@@ -147,7 +147,7 @@ Proof.
   rewrite (symmetry r).
   rewrite EqG_PlusAssoc.
   rewrite (EqG_PlusCommut x (Connect x y)).
-  rewrite (symmetry (containmentLeft A R x y H)).
+  rewrite (symmetry (containmentLeft x y)).
   reflexivity.
 Qed.
 
@@ -159,6 +159,6 @@ Proof.
   rewrite (symmetry r).
   rewrite EqG_PlusAssoc.
   rewrite (EqG_PlusCommut y (Connect x y)).
-  rewrite (symmetry (containmentRight A R x y H)).
+  rewrite (symmetry (containmentRight x y)).
   reflexivity.
 Qed.

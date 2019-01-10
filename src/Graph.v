@@ -72,21 +72,20 @@ Class EqG (A:Type) (R : relation (Graph A)) : Prop := {
     R (Connect x (Connect y z)) (Overlay (Connect x y) (Overlay (Connect x z) (Connect y z)))
  }.
 
-Lemma EqG_PlusRightCong (A:Type) (R: relation (Graph A)) : EqG A R ->
+Lemma EqG_PlusRightCong {A} {R: relation (Graph A)} `{EqG A R} :
   forall x y z, R x y -> R (Overlay z x) (Overlay z y).
 Proof.
-  intros H x y z r.
+  intros x y z r.
   rewrite EqG_PlusCommut.
   rewrite (EqG_PlusCommut z y).
   apply EqG_PlusLeftCong.
   exact r.
 Qed.
 
-Lemma eq_impl_eqG (A:Type) (R: relation (Graph A)) (a:Graph A) (b:Graph A): a=b -> EqG A R -> R a b.
+Lemma eq_impl_eqG {A} {R: relation (Graph A)} {a b:Graph A} `{EqG A R}: a=b -> R a b.
 Proof.
-  intros L H.
+  intros L.
   rewrite L.
-  destruct H.
   reflexivity.
 Qed.
 
@@ -95,7 +94,7 @@ Add Parametric Morphism A (R: relation (Graph A)) `(EqG A R) : Overlay
     as overlay_morph.
 Proof.
   intros x y r x' y' r'.
-  apply (EqG_PlusRightCong A R H x' y' x) in r'.
+  apply (EqG_PlusRightCong x' y' x) in r'.
   apply (EqG_PlusLeftCong x y y') in r.
   transitivity (Overlay x y').
   exact r'.
@@ -114,10 +113,9 @@ Proof.
   exact r.
 Qed.
 
-Theorem pre_idempotence_Plus (A:Type) (R:relation (Graph A)) (x:Graph A):
-  EqG A R -> R (Overlay x (Overlay x Empty)) x.
+Theorem pre_idempotence_Plus {A} {R:relation (Graph A)} (x:Graph A) `{EqG A R}:
+  R (Overlay x (Overlay x Empty)) x.
 Proof.
-  intros E.
   rewrite (symmetry (EqG_TimesRightId x)) at 1 2.
   rewrite (symmetry (EqG_TimesRightId Empty)) at 3.
   rewrite (symmetry (EqG_decomposition x Empty Empty)).
@@ -126,10 +124,9 @@ Proof.
   reflexivity.
 Qed.
 
-Theorem id_Plus (A:Type) (R:relation (Graph A)) (x:Graph A) : EqG A R -> R (Overlay x Empty) x.
+Theorem id_Plus {A} {R:relation (Graph A)} (x:Graph A) `{EqG A R}: R (Overlay x Empty) x.
 Proof.
-  intros E.
-  rewrite (symmetry (pre_idempotence_Plus A R (Overlay x Empty) E)).
+  rewrite (symmetry (pre_idempotence_Plus (Overlay x Empty))).
   rewrite EqG_PlusAssoc.
   rewrite EqG_PlusAssoc.
   rewrite (symmetry (EqG_PlusAssoc x Empty x)).
@@ -138,48 +135,44 @@ Proof.
   rewrite (symmetry (EqG_PlusAssoc (Overlay x x) Empty Empty)).
   rewrite (symmetry (EqG_PlusAssoc (Overlay x x) (Overlay Empty Empty) Empty)).
   rewrite (EqG_PlusCommut (Overlay Empty Empty) Empty).
-  rewrite (pre_idempotence_Plus A R Empty E).
+  rewrite (pre_idempotence_Plus Empty).
   rewrite EqG_PlusCommut.
   rewrite EqG_PlusAssoc.
   rewrite (EqG_PlusCommut Empty x).
   rewrite EqG_PlusCommut.
-  rewrite (pre_idempotence_Plus A R x E).
+  rewrite (pre_idempotence_Plus x).
   reflexivity.
 Qed.
 
-Lemma containmentLeft A R (x y : Graph A) : EqG A R -> R (Connect x y) (Overlay (Connect x y) x).
+Lemma containmentLeft {A} {R} (x y : Graph A) `{EqG A R}: R (Connect x y) (Overlay (Connect x y) x).
 Proof.
-  intros H.
   rewrite (symmetry (EqG_TimesRightId x)) at 3.
   rewrite (symmetry (EqG_LeftDistributivity x y Empty)).
-  rewrite (id_Plus A R y H).
+  rewrite (id_Plus y).
   reflexivity.
 Qed.
 
-Lemma containmentRight A R (x y : Graph A) : EqG A R -> R (Connect x y) (Overlay (Connect x y) y).
+Lemma containmentRight {A} {R} (x y : Graph A) `{EqG A R}: R (Connect x y) (Overlay (Connect x y) y).
 Proof.
-  intros H.
   rewrite (symmetry (EqG_TimesRightId (Connect x y))) at 1.
   rewrite (symmetry (EqG_TimesAssoc x y Empty)).
   rewrite EqG_decomposition.
   repeat rewrite EqG_TimesRightId.
   rewrite EqG_PlusAssoc.
-  rewrite (symmetry (containmentLeft A R x y H)).
+  rewrite (symmetry (containmentLeft x y)).
   reflexivity.
 Qed.
 
-Lemma plus_Idempotence A R (x : Graph A) : EqG A R -> R (Overlay x x) x.
+Lemma plus_Idempotence {A} {R} (x : Graph A) `{EqG A R }: R (Overlay x x) x.
 Proof.
-  intros H.
-  rewrite (symmetry (id_Plus A R x H)) at 1.
+  rewrite (symmetry (id_Plus x)) at 1.
   rewrite EqG_PlusCommut.
-  rewrite (pre_idempotence_Plus A R x H).
+  rewrite (pre_idempotence_Plus x).
   reflexivity.
 Qed.
 
-Theorem timesLeftId A (R: relation (Graph A)) `(EqG A R): forall x, R (Connect Empty x) x.
+Theorem timesLeftId {A} {R} (x: Graph A) `{EqG A R}: R (Connect Empty x) x.
 Proof.
-  intros x.
   induction x.
   - rewrite EqG_TimesRightId. reflexivity.
   - exact (EqG_TimesLeftIdVertex a).
@@ -191,7 +184,7 @@ Proof.
     rewrite (EqG_PlusCommut x2 (Connect x1 x2)).
     rewrite EqG_PlusAssoc.
     rewrite (EqG_PlusCommut x1 (Connect x1 x2)).
-    rewrite (symmetry (containmentLeft A R x1 x2 H)).
-    rewrite (symmetry (containmentRight A R x1 x2 H)).
+    rewrite (symmetry (containmentLeft x1 x2)).
+    rewrite (symmetry (containmentRight x1 x2)).
     reflexivity.
 Qed.
