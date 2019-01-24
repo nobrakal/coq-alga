@@ -133,8 +133,7 @@ Proof.
     rewrite andb_true_iff in i.
     fold (isEmpty g1) in i; fold (isEmpty g2) in i.
     destruct i.
-    apply IHg1 in H.
-    apply IHg2 in H0.
+    apply IHg1 in H; apply IHg2 in H0.
     rewrite H0.
     rewrite (id_Plus g1).
     exact H.
@@ -143,8 +142,7 @@ Proof.
     rewrite andb_true_iff in i.
     fold (isEmpty g1) in i; fold (isEmpty g2) in i.
     destruct i.
-    apply IHg1 in H.
-    apply IHg2 in H0.
+    apply IHg1 in H; apply IHg2 in H0.
     rewrite H0.
     rewrite EqG_TimesRightId.
     exact H.
